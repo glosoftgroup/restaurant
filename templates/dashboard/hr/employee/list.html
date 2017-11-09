@@ -40,6 +40,15 @@
         </div>
       <a class="heading-elements-toggle"><i class="icon-more"></i></a></div>
         <div class="panel-body">
+            <div class="col-md-2">
+              <label style="visibility: hidden;"> add</label>
+              <div class="form-group">
+                {% if perms.hr.add_employee %}
+                   <a href="{% url 'dashboard:add_employee' %}" class="btn-block btn-primary btn-lg ladda-button" data-style="expand-right" id="addbutton">
+                       <i class="icon-plus3 position-left"></i>Add Employee</a>
+                {% endif %}
+              </div>
+            </div>
             <div class="col-md-4">
              <label>Search Employees</label>
               <div class="form-group form-group-material has-feedback">
@@ -86,18 +95,10 @@
                   </select>
               </div>
             </div>
-            <div class="col-md-2">
-              <label style="visibility: hidden;"> add</label>
-              <div class="form-group">
-                {% if perms.userprofile.add_user %}
-                   <a href="{% url 'dashboard:add_employee' %}" class="btn-block btn-primary btn-lg">Add Employee</a>
-                {% endif %}
-              </div>
-            </div>
         </div>
       </div>
    </div>
-  {% if users %}
+
   <div class="col-md-12">
    <div id="pagination-div">
       <!-- Header and footer fixed -->
@@ -120,6 +121,7 @@
                   </tr>
                 </thead>
                 <tbody id="tb">
+                {% if users %}
                   {% for user in users %}
                   <tr class='clickable-row' id="{{user.pk }}">
                     <td class="td" data-href="{% url 'dashboard:user-detail' pk=user.pk %}">#{{ forloop.counter }}</td>
@@ -158,6 +160,9 @@
                     {% endif %}
                   </tr>
                   {% endfor %}
+                {% else %}
+                <tr><td colspan="7" class="text-center"><h5 class="text-center">No Employees Availbale</h5></td></tr>
+                {% endif %}
                   </tbody>
            </table>
 
@@ -173,17 +178,6 @@
       </div>
     </div><!-- pagination -->
   </div>
-     {% else %}
-  <div class="col-md-12 animated fadeIn ">
-   <div class="panel bg-danger-600">
-     <div class="panel-body">
-       <div style="text-align: center;font-size:16px;">
-        No Employees to display
-       </div>
-      </div>
-    </div>
-  </div>
-{% endif %}
 </div>
 
 <!-- Blue modal -->
@@ -225,7 +219,6 @@
 <script type="text/javascript" src="{% static 'backend/js/plugins/forms/selects/bootstrap_select.min.js' %}"></script>
 <script type="text/javascript">
   $(document).ready(function() {
-
     $('.export-sz').selectpicker({
           iconBase: 'fa',
           tickIcon: 'fa-dot-circle-o',

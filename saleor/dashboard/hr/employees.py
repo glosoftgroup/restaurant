@@ -1,19 +1,7 @@
-from django.contrib.auth.models import Group, Permission
-from django.contrib.contenttypes.models import ContentType
-from django.contrib import messages
-from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, redirect, render_to_response
 from django.template.response import TemplateResponse
-from django.utils.http import is_safe_url
-from django.utils.translation import pgettext_lazy
-from django.views.decorators.http import require_http_methods
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.hashers import make_password
-from django.contrib.auth.decorators import login_required, permission_required
-from django.db.models import Count, Min, Sum, Avg, Max
-from django.core import serializers
-from django.template.defaultfilters import date
+from django.http import HttpResponse
+from django.db.models import Count, Min, Sum, Avg, Max, Q
 from django.core.paginator import Paginator, EmptyPage, InvalidPage, PageNotAnInteger
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
@@ -21,54 +9,32 @@ import datetime
 from datetime import date, timedelta
 from django.utils.dateformat import DateFormat
 import logging
-import random
-import csv
-from django.utils.encoding import smart_str
-from decimal import Decimal
-from calendar import monthrange
-import calendar
-from django_xhtml2pdf.utils import generate_pdf
-
-import re
-import base64
-
-from ...core.utils import get_paginator_items
 from ..views import staff_member_required
-from ...userprofile.models import User, Staff
-from ...supplier.models import Supplier
-from ...customer.models import Customer
-from ...sale.models import Sales, SoldItem, Terminal
-from ...product.models import Product, ProductVariant, Category
+from ...hr.models import *
 from ...decorators import permission_decorator, user_trail
-from ...utils import render_to_pdf, convert_html_to_pdf
-from ...site.models import UserRole, Department, BankBranch, Bank
 
 debug_logger = logging.getLogger('debug_logger')
 info_logger = logging.getLogger('info_logger')
 error_logger = logging.getLogger('error_logger')
 
 @staff_member_required
-@permission_decorator('userprofile.view_staff')
+@permission_decorator('hr.view_employee')
 def employees(request):
 	try:
-		users = Staff.objects.all().order_by('-id')
-		groups = UserRole.objects.all()
-		page = request.GET.get('page', 1)
-		paginator = Paginator(users, 10)
+		data = Employee.objects.all().order_by('-id')
+		departments = Department.objects.all()
+		roles = Role.objects.all()
+		paginator = Paginator(data, 10)
 		try:
-			users = paginator.page(page)
+			data = paginator.page(1)
 		except PageNotAnInteger:
-			users = paginator.page(1)
+			data = paginator.page(1)
 		except InvalidPage:
-			users = paginator.page(1)
+			data = paginator.page(1)
 		except EmptyPage:
-			users = paginator.page(paginator.num_pages)
-		user_trail(request.user.name, 'accessed employees', 'views')
-		info_logger.info('User: '+str(request.user.name)+' accessed the employee page')
-		if request.GET.get('initial'):
-			return HttpResponse(paginator.num_pages)
-		else:
-			return TemplateResponse(request, 'dashboard/hr/employee/list.html', {'groups':groups,'users':users})
+			data = paginator.page(paginator.num_pages)
+		ctx = {'data': data, 'roles': roles, 'departments':departments}
+		return TemplateResponse(request, 'dashboard/hr/employee/list.html', ctx)
 	except TypeError as e:
 		error_logger.error(e)
 		return HttpResponse('error accessing users')
@@ -80,18 +46,16 @@ def detail(request):
 def add(request):
     try:
         departments = Department.objects.all()
-        roles = UserRole.objects.all()
+        roles = Role.objects.all()
         banks = Bank.objects.all()
-        branches = BankBranch.objects.all()
         data = {
             "roles":roles,
             "departments":departments,
-            "banks":banks,
-            "branches":branches
+            "banks":banks
         }
-        user_trail(request.user.name, 'accessed add employee page', 'view')
         info_logger.info('User: ' + str(request.user.name) + 'viewed add employee page')
-        return TemplateResponse(request, 'dashboard/hr/employee/add_employee.html', data)
+        # return TemplateResponse(request, 'dashboard/hr/employee/add_employee.html', data)
+        return TemplateResponse(request, 'dashboard/hr/employee/test.html', data)
     except Exception, e:
         error_logger.error(e)
         return HttpResponse(e)
