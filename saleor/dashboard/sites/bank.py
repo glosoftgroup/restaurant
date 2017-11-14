@@ -1,27 +1,13 @@
-from django.contrib.auth.models import Group, Permission
-from django.contrib.contenttypes.models import ContentType
-from django.contrib import messages
-from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
-from django.shortcuts import get_object_or_404, redirect, render_to_response
+from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
-from django.core.exceptions import ObjectDoesNotExist
-from django.utils.http import is_safe_url
-from django.utils.translation import pgettext_lazy
-from django.views.decorators.http import require_http_methods
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.template.loader import render_to_string
+from django.http import HttpResponse
 from django.db.models import Q
 from django.db import IntegrityError
-import json
-import simplejson
-from ...core.utils import get_paginator_items
 from ..views import staff_member_required
-from ...site.models import Bank, BankBranch, UserRole, Department
-from ...decorators import permission_decorator, user_trail
-from django.core.paginator import Paginator
+from ...hr.models import Bank
+from ...decorators import user_trail
+from django.core.paginator import Paginator, PageNotAnInteger, InvalidPage, EmptyPage
 
 import logging
 

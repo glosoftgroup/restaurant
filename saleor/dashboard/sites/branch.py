@@ -1,27 +1,13 @@
-from django.contrib.auth.models import Group, Permission
-from django.contrib.contenttypes.models import ContentType
-from django.contrib import messages
-from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
-from django.shortcuts import get_object_or_404, redirect, render_to_response
+from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
-from django.core.exceptions import ObjectDoesNotExist
-from django.utils.http import is_safe_url
-from django.utils.translation import pgettext_lazy
-from django.views.decorators.http import require_http_methods
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.template.loader import render_to_string
+from django.http import HttpResponse
 from django.db.models import Q
 from django.db import IntegrityError
-import json
-import simplejson
-from ...core.utils import get_paginator_items
 from ..views import staff_member_required
-from ...site.models import Bank, BankBranch, UserRole, Department
-from ...decorators import permission_decorator, user_trail
-from django.core.paginator import Paginator
+from ...hr.models import BankBranch
+from ...decorators import user_trail
+from django.core.paginator import Paginator, PageNotAnInteger, InvalidPage, EmptyPage
 
 import logging
 
@@ -33,8 +19,7 @@ error_logger = logging.getLogger('error_logger')
 # @permission_decorator('userprofile.view_user')
 def view(request, pk=None):
 	try:
-		bank = Bank.objects.get(pk=pk)
-		branches = BankBranch.objects.filter(bank=pk).order_by('-id')
+		branches = BankBranch.objects.all().order_by('-id')
 		page = request.GET.get('page', 1)
 		paginator = Paginator(branches, 10)
 		try:
@@ -65,8 +50,7 @@ def branch_paginate(request):
 	bank_pk = request.GET.get('bank_pk')
 
 	try:
-		bank = Bank.objects.get(pk=bank_pk)
-		branches = BankBranch.objects.filter(bank__pk=bank_pk).order_by('-id')
+		branches = BankBranch.objects.all().order_by('-id')
 		if list_sz:
 			paginator = Paginator(branches, int(list_sz))
 			branches = paginator.page(page)
@@ -74,8 +58,7 @@ def branch_paginate(request):
 				'branches': branches,
 				'pn': paginator.num_pages,
 				'sz': list_sz,
-				'gid': 0,
-				'bank': bank
+				'gid': 0
 			}
 			return TemplateResponse(request, 'dashboard/sites/hr/bank/branch/p2.html', data)
 		else:
@@ -84,8 +67,7 @@ def branch_paginate(request):
 				paginator = Paginator(branches, int(p2_sz))
 			branches = paginator.page(page)
 			data = {
-				"branches": branches,
-				'bank': bank
+				"branches": branches
 			}
 			return TemplateResponse(request, 'dashboard/sites/hr/bank/branch/paginate.html', data)
 
@@ -106,9 +88,7 @@ def branch_paginate(request):
 def add_branch(request):
 	branch = request.POST.get('branch')
 	option = request.POST.get('option')
-	bank_pk = request.POST.get('bank_pk')
-	bank = Bank.objects.get(pk=bank_pk)
-	new_branch = BankBranch(name=branch, bank=bank)
+	new_branch = BankBranch(name=branch)
 
 	if option:
 		try:
@@ -164,10 +144,8 @@ def search(request):
 			sz = list_sz
 
 	if q is not None:
- 		bank = BankBranch.objects.filter(bank__pk=bank_pk)
-		# branches = bank.filter(
-		# 	Q(name__icontains=q)).order_by('-id')
-		branches = BankBranch.objects.filter(Q(name__icontains=q)).order_by('-id').filter(bank__pk=bank_pk)
+ 		bank = BankBranch.objects.all()
+		branches = BankBranch.objects.filter(Q(name__icontains=q)).order_by('-id')
 		paginator = Paginator(branches, 10)
 		try:
 			branches = paginator.page(page)

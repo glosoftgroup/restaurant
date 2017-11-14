@@ -199,9 +199,8 @@ $(function() {
             }
         },
         rules: {
-            email: {
-                email: true
-            }
+            name: {minlength:3},
+            email: {email: true}
         }
     });
 
@@ -212,6 +211,16 @@ $(function() {
 
     // Select2 selects
     $('.select').select2();
+    $('.select-department').select2();
+    $('.daterange-single').daterangepicker({
+        singleDatePicker: true,
+        locale:{format: 'YYYY-MM-DD'},
+        showDropdowns:true
+    });
+    $('.bootstrap-select').selectpicker({
+        iconBase: 'fa',
+        addIcon:'fa-plus-circle'
+    });
 
 
     // Simple select without search

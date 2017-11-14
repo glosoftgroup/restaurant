@@ -1,13 +1,8 @@
-from django.shortcuts import get_object_or_404, redirect, render_to_response
+from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.http import HttpResponse
-from django.db.models import Count, Min, Sum, Avg, Max, Q
 from django.core.paginator import Paginator, EmptyPage, InvalidPage, PageNotAnInteger
 from django.db.models import Q
-from django.core.exceptions import ObjectDoesNotExist
-import datetime
-from datetime import date, timedelta
-from django.utils.dateformat import DateFormat
 import logging
 from ..views import staff_member_required
 from ...hr.models import *
@@ -23,7 +18,7 @@ def employees(request):
 	try:
 		data = Employee.objects.all().order_by('-id')
 		departments = Department.objects.all()
-		roles = Role.objects.all()
+		roles = UserRole.objects.all()
 		paginator = Paginator(data, 10)
 		try:
 			data = paginator.page(1)
@@ -46,16 +41,18 @@ def detail(request):
 def add(request):
     try:
         departments = Department.objects.all()
-        roles = Role.objects.all()
+        roles = UserRole.objects.all()
         banks = Bank.objects.all()
+        branches = BankBranch.objects.all()
         data = {
             "roles":roles,
             "departments":departments,
-            "banks":banks
+            "banks":banks,
+			"branches":branches
         }
         info_logger.info('User: ' + str(request.user.name) + 'viewed add employee page')
         # return TemplateResponse(request, 'dashboard/hr/employee/add_employee.html', data)
-        return TemplateResponse(request, 'dashboard/hr/employee/test.html', data)
+        return TemplateResponse(request, 'dashboard/hr/employee/test2.html', data)
     except Exception, e:
         error_logger.error(e)
         return HttpResponse(e)
@@ -82,7 +79,7 @@ def add_process(request):
     marital_status = request.POST.get('marital_status')
     image = request.FILES.get('image')
     if image:
-        new_staff = Staff( name=name, email=email, gender=gender,
+        new_staff = Employee( name=name, email=email, gender=gender,
                       dob=dob, date_joined=doj, mobile=mobile,
                       national_id=nid, work_time=work_time, role=role,
                       department=department, image=image, account=account,
@@ -90,7 +87,7 @@ def add_process(request):
                       nssf=nssf, nhif=nhif, location=location,
                       religion=religion, marital_status=marital_status)
     else:
-        new_staff = Staff(name=name, email=email, gender=gender,
+        new_staff = Employee(name=name, email=email, gender=gender,
                          dob=dob, date_joined=doj, mobile=mobile,
                          national_id=nid, work_time=work_time, role=role,
                          department=department, account=account,
@@ -113,7 +110,7 @@ def edit(request, pk=None):
 @staff_member_required
 @permission_decorator('userprofile.delete_staff')
 def delete(request, pk=None):
-	user = get_object_or_404(Staff, pk=pk)
+	user = get_object_or_404(Employee, pk=pk)
 	if request.method == 'POST':
 		user.delete()
 		user_trail(request.user.name, 'deleted employee: '+ str(user.name),'delete')
@@ -128,7 +125,7 @@ def paginate(request):
 	p2_sz = request.GET.get('psize')
 	select_sz = request.GET.get('select_size')
 	if request.GET.get('gid'):
-		users = Staff.objects.filter(role=request.GET.get('gid'))
+		users = Employee.objects.filter(role=request.GET.get('gid'))
 		if p2_sz:
 			paginator = Paginator(users, int(p2_sz))
 			users = paginator.page(page)
@@ -139,7 +136,7 @@ def paginate(request):
 		return TemplateResponse(request,'dashboard/hr/employee/p2.html',{'users':users, 'pn':paginator.num_pages,'sz':10,'gid':request.GET.get('gid')})
 
 	else:
-		users = Staff.objects.all().order_by('-id')
+		users = Employee.objects.all().order_by('-id')
 		if list_sz:
 			paginator = Paginator(users, int(list_sz))
 			users = paginator.page(page)
@@ -173,7 +170,7 @@ def search(request):
             sz = list_sz
 
         if q is not None:
-            users = Staff.objects.filter(
+            users = Employee.objects.filter(
                 Q(name__icontains=q) |
                 Q(email__icontains=q) | Q(mobile__icontains=q) |
                 Q(role__icontains=q) | Q(department__icontains=q) |

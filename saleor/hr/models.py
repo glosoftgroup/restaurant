@@ -11,12 +11,17 @@ class Contacts(models.Model):
 		return str(self.name)
 
 class Bank(models.Model):
-	name = models.CharField(max_length=100, null=True, blank=True)
-	branch = models.CharField(max_length=100, null=True, blank=True)
-	account = models.CharField(max_length=100, null=True, blank=True)
+    name = models.CharField(max_length=100, null=True, blank=True)
 
-	def __str__(self):
-		return str(self.name)
+    def __str__(self):
+        return str(self.name)
+
+class BankBranch(models.Model):
+    name = models.CharField(max_length=100, null=True, blank=True)
+    bank =  models.ForeignKey(Bank, related_name='branch', max_length=100, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.name)
 
 class Department(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
@@ -24,7 +29,7 @@ class Department(models.Model):
     def __str__(self):
         return str(self.name)
 
-class Role(models.Model):
+class UserRole(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
