@@ -9,7 +9,12 @@
 {% endblock %}
 
  {% block breadcrumbs %}
-     <li class="active"><a href="{% url 'dashboard:room-list' %}">{{ table_name }} </a></li>
+     <li class="">
+         <a href="{% url 'dashboard:room-list' %}">{{ table_name }} </a>
+     </li>
+     <li class="active">
+         {% if room.pk %}Edit {% else %}Add{% endif %} room
+     </li>
  {% endblock %}
 
 
@@ -20,7 +25,7 @@
 
 {% endblock %}
 {% block content %}
-<form action="#">
+
     <div class="panel panel-flat">
 
 
@@ -28,49 +33,63 @@
 
             <div class="row">
                  <form id="room-form" enctype="multipart/form-data" novalidate>
-                {% csrf_token %}
-                <div class="col-md-6">
 
-                        <div class="form-group">
-                            <label>Room Name:</label>
-                            <input required class="form-control" name="name" id="name" placeholder="Room Name" type="text">
+                <div class="col-md-6">
+                        <div class="form-group hidden">
+                            {% csrf_token %}
                         </div>
 
                         <div class="form-group">
-                            <label>Price:</label>
-                            <input class="form-control" id="price" name="price" placeholder="Price" type="text">
+                            <label>Room Name:<span class="text-danger">*</span></label>
+                            <input required class="form-control" {% if room.pk %} value="{{room.name}}"{% endif %} name="name" id="name" placeholder="Room Name" type="text">
+                            <span class="help-block text-warning"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Price:<span class="text-danger">*</span></label>
+                            <input class="form-control" id="price" {% if room.pk %} value="{{room.price.gross}}"{% endif %}  name="price" placeholder="Price" type="number">
+                            <span class="help-block text-warning"></span>
                         </div>
 
 
                         <div class="form-group">
                             <label>Room Description:</label>
-                            <textarea rows="5" cols="5" class="form-control" id="description" name="description" placeholder="Enter room description here"></textarea>
+                            <textarea rows="5" cols="5" class="form-control" id="description" name="description" placeholder="Enter room description here">{% if room.description %}{{ room.description.strip }}{% endif %}</textarea>
+                            <span class="help-block text-warning"></span>
                         </div>
 
                 </div>
 
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label>Amenities:</label>
-                        <select class="amenities hidden" multiple></select>
+                        <label>Amenities:<span class="text-danger">*</span></label>
+                        <select class="amenities hidden" multiple>
+                            {% if room.id %}
+                                {% for amenity in room.amenities.all %}
+                                    <option selected="selected" value="{{amenity.id}}">{{amenity.name}}</option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                        <span class="help-block"></span>
                         <span class="help-block">Did'nt find what you were looking  for? Add new
-                            <button type="button" id="add_new_amenities_btn" class="btn bg-primary btn-xs btn-icon legitRipple edit_modal-trigger" data-popup="tooltip" data-original-title="Add New category" href="#modal_add_category" id="add-new-category" data-title="Add New category" data-href="/dashboard/categories/add/cat32/" data-csrf="<input type='hidden' name='csrfmiddlewaretoken' value='wvYfCnxhR64GzQeHDIHSCPu6aXxPoxdwf8beDvBggbhlErTqdMlRyzpZC9SUmvdE' />" onclick="return false;">
+                            <button type="button" id="add_new_amenities_btn" class="btn bg-primary btn-xs btn-icon legitRipple edit_modal-trigger" data-popup="tooltip" data-original-title="Add New amenity" href="#modal_add_category" id="add-new-category" data-title="Add New category" data-href="/dashboard/categories/add/cat32/" data-csrf="<input type='hidden' name='csrfmiddlewaretoken' value='wvYfCnxhR64GzQeHDIHSCPu6aXxPoxdwf8beDvBggbhlErTqdMlRyzpZC9SUmvdE' />" onclick="return false;">
                                <i class="icon-plus-circle2"></i>
                              </button>
                         </span>
                     </div>
                     <div id="add_new_amenities" style="display:none">
-                        <label>New amenities:</label>
+                        <label>New amenities:<span class="text-danger">*</span></label>
                         <select class="new_amenities hidden" multiple></select>
-                        <button type="button" id="new_amenities_btn" class="btn bg-primary btn-xs btn-icon legitRipple edit_modal-trigger" data-popup="tooltip" data-original-title="Add New category" href="#modal_add_category" id="add-new-category" data-title="Add New category" data-href="/dashboard/categories/add/cat32/" data-csrf="<input type='hidden' name='csrfmiddlewaretoken' value='wvYfCnxhR64GzQeHDIHSCPu6aXxPoxdwf8beDvBggbhlErTqdMlRyzpZC9SUmvdE' />" onclick="return false;">
-                           <i class="icon-plus-circle2"></i>Add
+                        <span class="help-block"></span>
+                        <button type="button" id="new_amenities_btn" class="btn bg-primary btn-xs btn-icon legitRipple edit_modal-trigger" onclick="return false;">
+                           <i class="icon-plus-circle2"></i> Add
                         </button>
                     </div>
-                </div>
-            </div>
 
-            <div class="text-right">
-                <button onclick="return false;" id="add-room-btn" type="submit" class="btn btn-primary legitRipple">Submit form <i class="icon-arrow-right14 position-right"></i></button>
+            </div>
+            <input type="hidden" id="room_id" name="room_id" {% if room.id %} value="{{room.id}}" {% endif %}>
+            <div class="text-right col-md-12">
+                <button onclick="return false;" id="add-room-btn" type="submit" class="btn btn-primary legitRipple">{% if room.id %}Edit{% else %}{% endif %} <i class="icon-arrow-right14 position-right"></i></button>
             </div>
             </form>
         </div>
@@ -92,5 +111,16 @@
 <script type="text/javascript" src="{% static 'backend/js/plugins/forms/selects/bootstrap_select.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/room/add-room.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/plugins/tokenize/tokenize2.js' %}"></script>
-
+$('#room-form').validate({
+    rules:{
+        name: {
+          required:true,
+          minlength:3
+        },
+        price: {
+          required:true,
+          minlength:3
+        },
+      }
+    });
 {% endblock %}

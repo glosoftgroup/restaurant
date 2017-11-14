@@ -38,8 +38,7 @@
 
                     </td>
 
-
-                    {% if perms.sale.delete_paymentoption %}
+                    {% if perms.sale.delete_room %}
                     <!-- actions -->
                     <td class="text-center">
                         <div class="btn-group">
@@ -47,7 +46,7 @@
                         action <span class="roomet"></span>
                         </button>
                         <ul class="dropdown-menu edit-dropdown">
-                              <li class="td" data-href="{% url 'dashboard:room-detail' pk=option.pk %}" data-mtitle="{{option.name}}" data-m="#pdetail"><a><i class="icon-pencil7"></i> EDIT</a>
+                              <li class="td"><a href="{% url 'dashboard:room-edit' pk=option.pk %}"><i class="icon-pencil7"></i> EDIT</a>
                               </li>
                             <li>
                                 <a data-ta="#modal_instance" data-title="Delete   {{ option.name }} ?" data-href="{% url 'dashboard:room-delete' pk=option.pk %}" data-name="{{ option.name}}" data-id="{{ option.pk }}"

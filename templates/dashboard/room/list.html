@@ -93,7 +93,7 @@
                     </td>
 
                     
-                    {% if perms.sale.delete_paymentoption %}
+                    {% if perms.sale.delete_room %}
                     <!-- actions -->
                     <td class="text-center">
                         <div class="btn-group">
@@ -101,7 +101,7 @@
                         action <span class="roomet"></span>
                         </button>
                         <ul class="dropdown-menu edit-dropdown">
-                              <li class="td" data-href="{% url 'dashboard:room-detail' pk=option.pk %}" data-mtitle="{{option.name}}" data-m="#pdetail"><a><i class="icon-pencil7"></i> EDIT</a>
+                              <li class="td"><a href="{% url 'dashboard:room-edit' pk=option.pk %}"><i class="icon-pencil7"></i> EDIT</a>
                               </li>
                             <li>
                                 <a data-ta="#modal_instance" data-title="Delete   {{ option.name }} ?" data-href="{% url 'dashboard:room-delete' pk=option.pk %}" data-name="{{ option.name}}" data-id="{{ option.pk }}"
@@ -176,7 +176,7 @@
 </div>
 
 <!-- Blue modal -->
- <div id="modal_instance" class="modal fade">
+ <div id="modal_instancje" class="modal fade">
    <div class="modal-dialog modal-sm">
      <div class="modal-content">
        <div class="modal-header bg-blue">
@@ -184,7 +184,7 @@
          <h6 class="modal-title text-white text-center"></h6>
        </div>
        <div class="modal-body">
-         <div class="">
+
          <form action="" class="delete_form" method="post" id="delform" novalidate>
          {% csrf_token %}
          <div class="">
@@ -192,19 +192,18 @@
              Confirm delete !
            </h5>
            <input type="hidden" class="item-id" />
-           </div>
+        </div>
 
-         </div>
-       </div>
 
        <div class="modal-footer">
          <button type="submit" id='modal_delete' class="btn pull-right bg-danger del" onclick="return false" data-id="" data-href="">Delete</button>
-         </form>
          <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
        </div>
+      </form>
      </div>
    </div>
  </div>
+
  <div class="info"></div>
  <!-- /blue modal -->
 <!-- expense detail modal -->
@@ -260,6 +259,38 @@
    </div>
  </div>
  <!-- /edit modal -->
+
+ </div>
+ </div>
+!-- Blue modal -->
+ <div id="modal_instance" class="modal fade">
+   <div class="modal-dialog modal-sm">
+     <div class="modal-content">
+       <div class="modal-header bg-blue">
+         <button type="button" class="close" data-dismiss="modal">&times;</button>
+         <h6 class="modal-title text-white text-center"></h6>
+       </div>
+       <div class="modal-body">
+
+         <form action="" class="delete_form" method="post" id="delform" novalidate>
+         {% csrf_token %}
+         <div class="">
+           <h5 class="text-center">
+             Confirm delete !
+           </h5>
+           <input type="hidden" class="item-id" />
+        </div>
+
+
+       <div class="modal-footer">
+         <button type="submit" id='modal_delete' class="btn pull-right bg-danger del" onclick="return false" data-id="" data-href="">Delete</button>
+         <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+       </div>
+      </form>
+     </div>
+   </div>
+ </div>
+
 {% endblock%}
 {% block custom_js %}
   <script type="text/javascript" src="{% static 'backend/js/plugins/forms/selects/bootstrap_multiselect.js' %}"></script>
@@ -270,16 +301,7 @@
   var paginationUrl = "{% url 'dashboard:room_paginate' %}";
   $(document).ready(function() {
 
-    $('#addExpenseBtn').on('click', function(){
-        $('#addExpenseTable').slideToggle( "slow");
-    });
-    $('#id_sale_point').selectpicker();
-    $('.spoint').selectpicker();
 
-    $('.expense_type').selectpicker({
-        iconBase: 'fa',
-        addIcon:'fa-plus-circle'
-    });
     $('.input-group').on('change', '.sel', function(){
        var v = $(this).val();
 
@@ -389,6 +411,10 @@
               error:function(error){}
           });
       });
+      $('.dele-btn').on('click',function(){
+        alert('sdfsdfsdd');
+        $('#modal_mini').modal();
+    });
 
       $('.modal-trigger').on('click', function (e) {
 

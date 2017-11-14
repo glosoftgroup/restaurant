@@ -57,8 +57,11 @@ def list(request):
 @staff_member_required
 def add(request):
     if request.method == 'POST':
-        if request.POST.get('name'):
+        if request.POST.get('pk'):
+            instance = Table.objects.get(pk=request.POST.get('pk'))
+        else:
             instance = Table()
+        if request.POST.get('name'):
             instance.name = request.POST.get('name')
             if request.POST.get('price'):
                 instance.price = request.POST.get('price')
@@ -68,7 +71,7 @@ def add(request):
             # add amenities
             if request.POST.get('amenities'):
                 choices = json.loads(request.POST.get('amenities'))
-                print choices
+                instance.amenities.clear()
                 for choice in choices:
                     instance.amenities.add(choice)
                 instance.save()
@@ -86,14 +89,10 @@ def delete(request, pk=None):
     option = get_object_or_404(Table, pk=pk)
     if request.method == 'POST':
         try:
-            if option.name == "Loyalty Points":
-                pass
-            else:
-                option.delete()
-                user_trail(request.user.name, 'deleted payment option : '+ str(option.name),'delete')
-                info_logger.info('deleted payment option: '+ str(option.name))
-                return HttpResponse('success')
-            return HttpResponse(json.dumps({'error':"Object is not deletable"}),content_type='application/json')
+            option.delete()
+            user_trail(request.user.name, 'deleted room : '+ str(option.name), 'delete')
+            info_logger.info('deleted room: '+ str(option.name))
+            return HttpResponse('success')
         except Exception, e:
             error_logger.error(e)
             return HttpResponse(e)
@@ -101,22 +100,27 @@ def delete(request, pk=None):
 
 @staff_member_required
 def edit(request, pk=None):
-    option = get_object_or_404(Table, pk=pk)
+    room = get_object_or_404(Table, pk=pk)
+    if request.method == 'GET':
+        ctx = {'table_name': table_name, 'room': room}
+        return TemplateResponse(request, 'dashboard/room/form.html', ctx)
     if request.method == 'POST':
         try:
             if request.POST.get('name'):
-                option.name = request.POST.get('name')
-                if request.POST.get('number'):
-                    option.number = request.POST.get('number')
-                option.save()
-                user_trail(request.user.name, 'updated car : '+ str(option.name),'delete')
-                info_logger.info('updated car : '+ str(option.name))
+                room.name = request.POST.get('name')
+            if request.POST.get('price'):
+                room.number = request.POST.get('price')
+                room.save()
+                user_trail(request.user.name, 'updated room : '+ str(room.name),'edit')
+                info_logger.info('updated room : '+ str(room.name))
                 return HttpResponse('success')
             else:
                 return HttpResponse('invalid response')
         except Exception, e:
             error_logger.error(e)
+            print e
             return HttpResponse(e)
+
 
 
 @staff_member_required
@@ -250,7 +254,10 @@ def add_amenities(request):
         if request.POST.get('amenities'):
             choices = json.loads(request.POST.get('amenities'))
             for choice in choices:
-                RoomAmenity.objects.create(name=choice)
+                try:
+                    RoomAmenity.objects.create(name=choice)
+                except Exception as e:
+                    error_logger.info(e)
             return HttpResponse(json.dumps({'success': choice}), content_type='application/json')
         return HttpResponse(json.dumps({'message': 'Amenities required'}), content_type='application/json')
     else:

@@ -35,14 +35,26 @@ $(function() {
     var newAmenitiesDiv = $('#add_new_amenities');
     var addNewAmBtn = $('#add_new_amenities_btn');
 
+    // delete room
+    var deleteBtn = $('#delete');
+    var confirmDeleteBtn = $('#confirm-delete');
+
     // form data
     var name = $('#name');
+    var roomId = $('#room_id');
     var description = $('#description');
     var price  = $('#price');
     var addRoomBtn = $('#add-room-btn');
     var amenities = $('.amenities');
     var new_amenities = $('.new_amenities');
     var new_amenities_btn = $('#new_amenities_btn');
+
+    // handle deleting a room
+    deleteBtn.on('click',function(e){
+        $(this).nextAll('.confirm-delete:first').html('sdfe').toggle('slow');
+    });
+
+
 
     //  toggle new amenities division
     addNewAmBtn.on('click',function(){
@@ -53,7 +65,7 @@ $(function() {
     new_amenities_btn.on('click',function(){
         if(!new_amenities.val())
         {
-            alertUser('Amenities required','bg-danger');
+            new_amenities.nextAll('.help-block:first').addClass('text-warning').html('Please Hit <span class="label label-warning">Enter</span> Key. This field is required.');
             return false;
         }
         dynamicData = {};
@@ -76,31 +88,45 @@ $(function() {
 
     //    ./new amenities
 
+    //    remove help block
+    name.on('focusin',function(){
+          $(this).nextAll('.help-block:first').html('');
+    });
+    price.on('focusin',function(){
+          $(this).nextAll('.help-block:first').html('');
+    });
+    amenities.on('focusin',function(){
+          $(this).nextAll('.help-block:first').html('');
+    });
+    new_amenities.on('focusin',function(){
+          $(this).nextAll('.help-block:first').html('');
+    });
 
     addRoomBtn.on('click',function(){
+        dynamicData = {}; //clear dynamic data
         //    validation
         if(!name.val()){
-            alertUser('name required','bg-danger','Field Error');
+            name.nextAll('.help-block:first').addClass('text-warning').html('This field is required');
             return false;
         }
-        if(!description.val()){
-            alertUser('description required','bg-danger','Field Error');
-            return false;
+        if(description.val()){
+            dynamicData['description'] = description.val();
+        }
+        if(roomId.val()){
+            dynamicData['pk'] = roomId.val();
         }
         if(!price.val()){
-            alertUser('room type required','bg-danger','Field Error');
+            price.nextAll('.help-block:first').addClass('text-warning').html('This field is required. Please enter a number');
             return false;
         }
         if(!amenities.val())
         {
-            alertUser('Amenities required','bg-danger','Field Error');
+            amenities.nextAll('.help-block:first').addClass('text-warning').html('This field is required');
             return false;
         }
 
         // add dynamic post data
-        dynamicData = {};
         dynamicData['name'] = name.val();
-        dynamicData['description'] = description.val();
         dynamicData['price'] = price.val();
         dynamicData['track'] = 'add room';
         dynamicData['amenities'] = JSON.stringify(amenities.val());
