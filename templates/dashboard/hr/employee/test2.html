@@ -19,6 +19,17 @@
     }
     .table{border:1px solid #ccc}
     #addExpenseTable{display:none;}
+    .wizard > .steps > ul > li.current .number {
+        border-color: #1E88E5 !important;
+        background-color: #fff;
+        color: #1E88E5 !important;
+    }
+    .wizard > .steps > ul > li.done .number {
+        font-size: 0;
+        background-color: #1E88E5 !important;
+        border-color: #1E88E5 !important;
+        color: #fff;
+    }
   </style>
  {% endblock %}
 
@@ -123,7 +134,7 @@
                                         </div>
 
                                         <div class="input-group-btn">
-                                            <button type="button" class="btn bg-indigo btn-icon legitRipple edit_modal-trigger"
+                                            <button type="button" class="btn bg-primary btn-icon legitRipple edit_modal-trigger"
                                                     data-popup="tooltip" data-original-title="Add New Department" data-placement="top"
                                                     data-ta="#edit_modal_instance" data-title="Add New Department" data-select="#departments"
                                                     data-href="{% url 'dashboard:add_department' %}" data-cat="department"
@@ -156,7 +167,7 @@
                                             </div>
 
 											<div class="input-group-btn">
-												<button type="button" class="btn bg-indigo btn-icon legitRipple edit_modal-trigger edit-btn"
+												<button type="button" class="btn bg-primary btn-icon legitRipple edit_modal-trigger edit-btn"
                                                         data-popup="tooltip" data-original-title="Add New Role" data-placement="top"
                                                         data-ta="#edit_modal_instance" data-title="Add New Role" data-select="#roles"
                                                         data-href="{% url 'dashboard:add_role' %}" data-cat="user_role" data-label="Role:">
@@ -265,7 +276,7 @@
                                     </div>
 
                                     <div class="input-group-btn">
-                                        <button type="button" class="btn bg-indigo btn-icon legitRipple edit_modal-trigger"
+                                        <button type="button" class="btn bg-primary btn-icon legitRipple edit_modal-trigger"
                                                 data-popup="tooltip" data-original-title="Add New Bank" data-placement="top"
                                                 data-ta="#edit_modal_instance" data-title="Add New Bank" data-select="#banks"
                                                 data-href="{% url 'dashboard:add_bank' %}" data-cat="bank" data-label="Bank:">
@@ -296,7 +307,7 @@
                                 </div>
 
                                 <div class="input-group-btn">
-                                    <button type="button" class="btn bg-indigo btn-icon legitRipple edit_modal-trigger"
+                                    <button type="button" class="btn bg-primary btn-icon legitRipple edit_modal-trigger"
                                             data-popup="tooltip" data-original-title="Add New Branch" data-placement="top"
                                             data-icon="fa-plus-circle" data-ta="#edit_modal_instance" data-title="Add New Branch" data-select="#branches"
                                             data-href="{% url 'dashboard:add_branch' %}" data-cat="branch" data-label="Branch:">
