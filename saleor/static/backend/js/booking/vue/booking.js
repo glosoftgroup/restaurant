@@ -13,7 +13,9 @@ var parent = new Vue({
     },
     created:function(){
        console.log('vue running in parent');
-       //console.log(today);
+       if($('#days').val()){
+         this.days = $('#days').val();
+       }
     },
     methods:{
         checkIn:function(){
@@ -28,7 +30,7 @@ var parent = new Vue({
     },
      watch: {
     	'days': function(val, oldVal){
-                console.log($('#check_out').val());
+                //console.log($('#check_out').val());
                 //this.check_out = moment($('#check_in').val()).add(parseInt(this.days), 'days').format('MM/DD/YYYY');
                 //$('#check_out').val(this.check_out);
 

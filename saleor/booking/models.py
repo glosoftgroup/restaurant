@@ -15,6 +15,9 @@ class Book(models.Model):
     description = models.CharField(
         pgettext_lazy('Book field', 'Table name'),
         max_length=152, default='', null=True, blank=True)
+    price_type = models.CharField(
+        pgettext_lazy('Book field', 'price type'),
+        max_length=152, default='', null=True, blank=True)
     price = PriceField(
         pgettext_lazy('Book field', 'price'),
         currency=settings.DEFAULT_CURRENCY, max_digits=12,

@@ -88,7 +88,7 @@
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label class="text-bold">Weekly:</label>
-                                        <input id="weekly" v-model.number="weekly" name="weekly" placeholder="Weekly" class="form-control packages" type="number"  required="required">
+                                        <input id="weekly" v-model.number="weekly" name="weekly" placeholder="Weekly" class="form-control packages" type="number"  required="required" {% if pricing.pk %} value="{{pricing.weekly.gross}}" {% endif %}>
                                         <span class="help-block text-warning"></span>
                                     </div>
                                 </div>
@@ -96,7 +96,7 @@
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label class="text-bold">Monthly:</label>
-                                        <input id="monthly" v-model.number="monthly" name="monthly" placeholder="Monthly" class="form-control packages" type="number"  required="required">
+                                        <input id="monthly" v-model.number="monthly" name="monthly" placeholder="Monthly" class="form-control packages" type="number"  required="required" {% if pricing.pk %} value="{{pricing.monthly.gross}}" {% endif %}>
                                         <span class="help-block text-warning"></span>
                                     </div>
                                 </div>

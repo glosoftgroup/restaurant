@@ -45,15 +45,29 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Select Room:<span class="text-danger">*</span></label>
-                        <select required="required" class="rooms hidden" multiple>
-                            {% if room.id %}
-                                {% for amenity in room.amenities.all %}
-                                    <option selected="selected" value="{{amenity.id}}">{{amenity.name}}</option>
-                                {% endfor %}
-                            {% endif %}
-                        </select>
-                        <span class="help-block"></span>
+                       <div class="row">
+                          <div class="col-md-9">
+                            <label>Select Room:<span class="text-danger">*</span></label>
+                            <select required="required" class="rooms hidden" multiple>
+                                {% if instance.id %}
+                                   <option selected="selected" value="{{instance.room.id}}">{{instance.room}}</option>
+                                {% endif %}
+                            </select>
+                            <span class="help-block"></span>
+                          </div>
+                          <div class="col-md-3">
+                              <label>Charge Type:</label>
+                              <select id="price_type" name="price_type" class="form-control bootstrap-select">
+                                  {% if instance.id %}
+                                  <option value="{{instance.price_type}}">{{instance.price_type}}</option>
+                                  {% endif %}
+                                  <option value="nightly">Nightly</option>
+                                  <option value="daytime">DateTime</option>
+                                  <option value="weekly">Weekly</option>
+                                  <option value="monthly">Monthly</option>
+                              </select>
+                          </div>
+                       </div>
                     </div>
 
                     <div class="form-group">
@@ -62,7 +76,7 @@
                               <label>Check-in Date:</label>
                               <div class="input-group">
                                 <span class="input-group-addon"><i class="icon-calendar22"></i></span>
-                                <input required="required" type="text" name="check_in" id="check_in"  class="form-control check-in">
+                                <input required="required" type="text" name="check_in" id="check_in"  class="form-control check-in" {% if instance.id %} value='{{instance.check_in|date:"c"}}' {% endif %}>
                               </div>
                             </div>
 
@@ -70,14 +84,14 @@
                                <label>Check-out Date:</label>
                               <div class="input-group">
                                 <span class="input-group-addon"><i class="icon-calendar22"></i></span>
-                                <input required="required" type="text" name="check_out" id="check_out" class="form-control check-out">
+                                <input required="required" type="text" name="check_out" id="check_out" class="form-control check-out" {% if instance.id %} value="{{instance.check_out|date:'c'}}" {% endif %}>
                               </div>
                             </div>
                             <div class="col-md-3">
                               <label class="text-right">Days:</label>
                               <div class="input-group">
                                 <span class="input-group-addon"><i class="icon-comma"></i></span>
-                                <input required="required" name="days" type="number" id="days" @change="computeCheckout()" v-model.number="days" class="form-control days" value="1">
+                                <input required="required" name="days" type="number" id="days" @change="computeCheckout()" v-model.number="days" class="form-control days" {% if instance.id %} value="{{instance.days}}" {% endif %}>
                               </div>
                             </div>
                         </div>
@@ -85,7 +99,7 @@
                     <div class="form-group">
                         <label>Price:<span class="text-danger">*</span></label>
                         <input required="required" disabled="disabled" class="form-control" id="price" name="price" placeholder="Price" type="number">
-                        <input required="required" class="form-control hidden" id="total_price" name="total_price" placeholder="hidden" type="hidden">
+                        <input required="required" class="form-control hidden" id="total_price" {% if instance.id %} value="{{instance.price}}" {% endif %} name="total_price" placeholder="hidden" type="hidden">
                         <input required="required" class="form-control hidden" id="room" name="room" placeholder="hidden" type="hidden">
                         <span class="help-block text-warning"></span>
                     </div>
@@ -102,11 +116,11 @@
                             <label class="control-label">Guest Details:<span class="text-danger">*</span></label>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <input required="required" placeholder="Name" id="c_name" name="c_name" class="form-control" type="text">
+                                    <input required="required" {% if instance.id %} value="{{instance.customer.name}}"{% endif %}  placeholder="Name" id="c_name" name="c_name" class="form-control" type="text">
                                 </div>
 
                                 <div class="col-md-6">
-                                    <input required="required" placeholder="Phone" id="mobile" name="mobile" class="form-control" type="text">
+                                    <input required="required" placeholder="Phone" id="mobile" name="mobile" class="form-control" type="text" {% if instance.id %} value="{{instance.customer.mobile}}"{% endif %}>
                                 </div>
                             </div>
                         </div>
@@ -115,21 +129,22 @@
                                <label>Adults:</label>
                               <div class="input-group">
                                 <span class="input-group-addon"><i class="icon-user"></i></span>
-                                <input type="number" value="1" placeholder="Adults" name="adult" id="adult" class="form-control ">
+                                <input type="number" {% if instance.id %} value="{{instance.adult}}" {% else %} value="1" {% endif %} placeholder="Adults" name="adult" id="adult" class="form-control ">
                               </div>
                             </div>
                             <div class="col-md-4">
                               <label>Children:</label>
                               <div class="input-group">
                                 <span class="input-group-addon"><i class="icon-users"></i></span>
-                                <input type="number" id="child" value="0" placeholder="Child" name="child" class="form-control" value="">
+                                <input type="number" id="child" {% if instance.id %} value="{{instance.child}}" {% endif %} placeholder="No children" name="child" class="form-control">
                               </div>
                             </div>
                         </div>
                         </div>
 
 
-            <input type="hidden" id="room_id" name="room_id" {% if room.id %} value="{{room.id}}" {% endif %}>
+            <input type="hidden" id="room_id" name="room_id" {% if instance.id %} value="{{instance.room.id}}" {% endif %}>
+            <input type="hidden" id="pk" name="pk" {% if instance.id %} value="{{instance.id}}" {% endif %}>
             <div class="text-right col-md-12">
                 <button id="create-book-btn" type="submit" class="btn btn-primary legitRipple">{% if room.id %}Edit{% else %}Book{% endif %} <i class="icon-arrow-right14 position-right"></i></button>
             </div>
@@ -154,7 +169,21 @@
 <script type="text/javascript" src="{% static 'backend/js/plugins/tokenize/tokenize2.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/plugins/vue/vue.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/booking/vue/booking.js' %}"></script>
+<script >
+    /* render select field */
+    // Basic select
+    $('.bootstrap-select').selectpicker();
 
-<script>
+    <!-- remove select duplicates when editing -->
+    var map = {};
+    $("#price_type").each(function(){
+        var value = $(this).text();
+        if (map[value] == null){
+            map[value] = true;
+        } else {
+            $(this).remove();
+        }
+    });
+
 </script>
 {% endblock %}

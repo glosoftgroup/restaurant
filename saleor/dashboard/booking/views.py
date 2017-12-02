@@ -81,6 +81,8 @@ def add(request):
             instance.price = request.POST.get('total_price')
         if request.POST.get('check_in'):
             instance.check_in = request.POST.get('check_in')
+        if request.POST.get('price_type'):
+            instance.price_type = request.POST.get('price_type')
         if request.POST.get('check_out'):
             instance.check_out = request.POST.get('check_out')
         if request.POST.get('days'):
@@ -119,26 +121,12 @@ def delete(request, pk=None):
 @staff_member_required
 def edit(request, pk=None):
     global table_name
-    room = get_object_or_404(Table, pk=pk)
+    instance = get_object_or_404(Table, pk=pk)
     if request.method == 'GET':
-        ctx = {'table_name': table_name, 'room': room}
+        ctx = {'table_name': table_name, 'instance': instance}
         return TemplateResponse(request, 'dashboard/'+table_name.lower()+'/form.html', ctx)
     if request.method == 'POST':
-        try:
-            if request.POST.get('name'):
-                room.name = request.POST.get('name')
-            if request.POST.get('price'):
-                room.number = request.POST.get('price')
-                room.save()
-                user_trail(request.user.name, 'updated room : '+ str(room.name),'edit')
-                info_logger.info('updated room : '+ str(room.name))
-                return HttpResponse('success')
-            else:
-                return HttpResponse('invalid response')
-        except Exception, e:
-            error_logger.error(e)
-            print e
-            return HttpResponse(e)
+        return HttpResponse('Invalid Request method')
 
 
 @staff_member_required
@@ -265,7 +253,7 @@ def fetch_amenities(request):
     l = []
     for instance in dictionary:
         # {"text": "Afghanistan", "value": "AF"},
-        contact = {'text': str(instance.name)+' ('+str(instance.price.gross)+')', 'value': instance.id}
+        contact = {'text': instance.name, 'value': instance.id}
         l.append(contact)
     return HttpResponse(json.dumps(l), content_type='application/json')
 
@@ -300,12 +288,13 @@ def customer_token(request):
 def compute_room_price(request):
     global table_name
     days = int(request.POST.get('days'))
-    print days
+    price_type = request.POST.get('price_type')
     rooms = json.loads(request.POST.get('rooms'))
     total = 0
     for instance in rooms:
         room = Room.objects.get(pk=int(instance))
-        total = float(total + room.price.gross)
+        total = float(total + eval('room.get_'+str(price_type)+'_price()'))
+        print eval('room.get_' + str(price_type) + '_price()')
     total *= float(int(days))
     return HttpResponse(json.dumps({"price": float(total)}), content_type='application/json')
 

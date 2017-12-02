@@ -30,15 +30,15 @@ var parent = new Vue({
           if(this.autoComplete){
             this.nightly = this.daily / 2;
             this.daytime = this.daily / 2;
-            this.weekly = (this.daytime + this.nightly) * 7;
-            this.monthly = (this.daytime + this.nightly) * 30;
+            this.weekly = (parseInt(this.daytime) + parseInt(this.nightly)) * 7;
+            this.monthly = (parseInt(this.daytime) + parseInt(this.nightly)) * 30;
           }
         },
         computeHalfDay:function(){
             /* check if field auto complete is enabled */
             if(this.autoComplete){
-                this.monthly = (this.daytime + this.nightly) * 30
-                this.weekly  = (this.daytime + this.nightly) * 7
+                this.monthly = (parseInt(this.daytime) + parseInt(this.nightly)) * 30
+                this.weekly  = (parseInt(this.daytime) + parseInt(this.nightly)) * 7
             }
         }
     }

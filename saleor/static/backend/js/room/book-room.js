@@ -22,6 +22,7 @@ function ajaxSky(dynamicData,url,method){
 
 }
 
+
 /* global variables */
 var dynamicData = {};
 var today = moment().format('YYYY-MM-DD HH:mm:ss');
@@ -51,6 +52,7 @@ $(function() {
     var roomId = bookingForm.find('#room_id');
     var description = bookingForm.find('#description');
     var price  = bookingForm.find('#price');
+    var priceType = bookingForm.find('#price_type');
     var totalPrice = bookingForm.find('#total_price');
     var addRoomBtn = bookingForm.find('#add-room-btn');
     var rooms = bookingForm.find('.rooms');
@@ -122,6 +124,7 @@ $(function() {
       function computeTotalPrice(roomsArr,days=null){
         dynamicData = {};
         dynamicData['rooms'] = JSON.stringify(roomsArr);
+        dynamicData['price_type'] = priceType.val();
         room.val(roomsArr[0]);
         if(!days){
             dynamicData['days'] = daysId.val();
@@ -140,6 +143,11 @@ $(function() {
          return 0;
         });
       }
+
+      /* compute price on price type change */
+      priceType.on('change',function(){
+        computeTotalPrice(rooms.val());
+      });
 
       //  take care of tokenized select field
       //  show rooms on focusin
@@ -295,9 +303,11 @@ $(function() {
         computeTotalPrice(rooms.val());
     });
 
-    /* set default dates */
-    checkInDate.val(today);
-    checkOutDate.val(tomorrow);
+    /* if not editing booking info, set default dates */
+    console.log(checkInDate.val());
+    if(!checkInDate.val()){ checkInDate.val(today); }
+    if(!checkOutDate.val()){ checkOutDate.val(tomorrow); }
+
 
 
     /****************************************
@@ -333,11 +343,11 @@ $(function() {
                   processData: false,
                   contentType: false,
                   success:function(data){
-                    $.jGrowl('Created successfully', {
+                    $.jGrowl('Data sent successfully', {
                       header: 'Well done!',
                       theme: 'bg-success'
                     });
-                    //window.location.reload();
+                    window.location.href = roomListUrl;
                   },
                   error:function(error){
                     console.log(error);

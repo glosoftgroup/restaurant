@@ -4,7 +4,18 @@
                   <tr class='clickable-row' id="{{option.pk }}">
                     <!-- name -->
                     <td class="td" data-href="{% url 'dashboard:room-detail' pk=option.pk %}" data-mtitle="{{option.name}}" data-m="#pdetail">{{option.name}}</td>
-                    <td class="td" data-href="{% url 'dashboard:room-detail' pk=option.pk %}" data-mtitle="{{option.name}}" data-m="#pdetail">{{option.price.gross}}</td>
+                    <td class="td" data-href="{% url 'dashboard:room-detail' pk=option.pk %}" data-mtitle="{{option.name}}" data-m="#pdetail">
+                      <div class="">
+                       <span class="text-size-small" data-popup="tooltip" title="Day time" data-placement="top">
+                           <i class="icon-sun3 text-muted"></i>
+                           <span class="text-size-small">{{option.get_daytime_price}}</span>
+                       </span> |
+                        <span class="text-size-small" data-popup="tooltip" title="Nightly charge" data-placement="top">
+                           <i class="icon-contrast text-muted"></i>
+                            <span class="text-size-small">{{option.get_nightly_price}}</span>
+                       </span>
+                      </div>
+                    </td>
                     <td class="td" data-href="{% url 'dashboard:room-detail' pk=option.pk %}" data-mtitle="{{option.name}}" data-m="#pdetail">
                         {% if option.amenities.all %}
                          {{option.amenities.all|join:", "}}

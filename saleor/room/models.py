@@ -221,45 +221,6 @@ class Room(models.Model, ItemRange, index.Indexed):
     def __str__(self):
         return self.name
 
-    def get_absolute_url(self):
-        return reverse('product:details', kwargs={'slug': self.get_slug(),
-                                                  'product_id': self.id})
-
-    def get_slug(self):
-        return slugify(smart_text(unidecode(self.name)))
-    
-    def get_product_tax(self):
-        return self.product_tax
-
-    def get_tax_value(self):
-        return self.product_tax.get_tax()
-
-    def is_in_stock(self):
-        return any(variant.is_in_stock() for variant in self)
-
-    def total_stock(self):
-        return Sum(self.variant.stock.stock_available())
-
-    def total_variants(self):
-        return len(self.variants.all())
-
-    def get_first_category(self):
-        for category in self.categories.all():
-            if not category.hidden:
-                return category
-        return None
-
-    def get_variants_count(self):
-        variants = self.variants.filter(product=self.pk)
-        total = 0
-        for stock in variants:
-            total += stock.get_stock_quantity()
-        return total
-
-    def is_available(self):
-        today = datetime.date.today()
-        return self.available_on is None or self.available_on <= today
-
     def get_first_image(self):
         first_image = self.images.first()
 
@@ -272,6 +233,21 @@ class Room(models.Model, ItemRange, index.Indexed):
 
     def set_attribute(self, pk, value_pk):
         self.attributes[smart_text(pk)] = smart_text(value_pk)
+
+    def get_nightly_price(self):
+        return self.room_price.all().get().nightly.gross
+
+    def get_daytime_price(self):
+        return self.room_price.all().get().daytime.gross
+
+    def get_daily_price(self):
+        return self.room_price.all().get().daily.gross
+
+    def get_weekly_price(self):
+        return self.room_price.all().get().nightly.gross
+
+    def get_monthly_price(self):
+        return self.room_price.all().get().monthly.gross
 
     def get_price_range(self, discounts=None,  **kwargs):
         if not self.variants.exists():
