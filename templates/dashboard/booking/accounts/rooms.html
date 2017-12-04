@@ -1,0 +1,18 @@
+{% extends "dashboard/base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+{% load prices_i18n %}
+
+{% block title %}
+  {{ table_name }}
+{% endblock %}
+
+{% block menu_book_class %}active{% endblock %}
+
+{% block breadcrumbs %}
+     <li class="active"><a href="{% url 'dashboard:room-list' %}">{{ table_name }} </a></li>
+{% endblock %}
+
+{% block content %}
+ rooms
+{% endblock %}

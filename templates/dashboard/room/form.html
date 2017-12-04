@@ -39,9 +39,36 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Room Name:<span class="text-danger">*</span></label>
-                            <input required class="form-control" {% if room.pk %} value="{{room.name}}"{% endif %} name="name" id="name" placeholder="Room Name" type="text">
-                            <span class="help-block text-warning"></span>
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <label>Room Name:<span class="text-danger">*</span></label>
+                                    <input required class="form-control" {% if room.pk %} value="{{room.name}}"{% endif %} name="name" id="name" placeholder="Room Name" type="text">
+                                    <span class="help-block text-warning"></span>
+                                </div>
+                                <div class="col-md-3" id="parent-div">
+                                    <label style="margin-top: 4px;">Floor:<span class="text-danger">*</span></label>
+                                    <select class="floor hidden" multiple>
+                                        {% if room.pk %}
+                                         <option selected="selected" value="{{room.floor}}">
+                                           {% if not room.floor %}Ground{% else %} {{room.floor}}{% endif %}
+                                        </option>
+                                        {% endif %}
+                                        <option {% if not room.pk %} selected="selected" {% endif %} value="0">
+                                            Ground
+                                        </option>
+                                        <option value="1">
+                                            1
+                                        </option>
+                                        <option value="2">
+                                            2
+                                        </option>
+                                        <option value="3">
+                                            3
+                                        </option>
+                                    </select>
+                                    <span class="help-block text-warning"></span>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <div class="row">
@@ -104,12 +131,6 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label>Room Description:</label>
-                            <textarea rows="5" cols="5" class="form-control" id="description" name="description" placeholder="Enter room description here">{% if room.description %}{{ room.description.strip }}{% endif %}</textarea>
-                            <span class="help-block text-warning"></span>
-                        </div>
-
                 </div>
 
                 <div class="col-md-6">
@@ -136,6 +157,11 @@
                         <button type="button" id="new_amenities_btn" class="btn bg-primary btn-xs btn-icon legitRipple edit_modal-trigger" onclick="return false;">
                            <i class="icon-plus-circle2"></i> Add
                         </button>
+                    </div>
+                    <div class="form-group">
+                        <label>Room Description:</label>
+                        <textarea rows="5" cols="5" class="form-control" id="description" name="description" placeholder="Enter room description here">{% if room.description %}{{ room.description.strip }}{% endif %}</textarea>
+                        <span class="help-block text-warning"></span>
                     </div>
 
             </div>

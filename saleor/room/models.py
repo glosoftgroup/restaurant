@@ -159,14 +159,17 @@ class RoomAmenity(models.Model):
 
 @python_2_unicode_compatible
 class Room(models.Model, ItemRange, index.Indexed):
-    room_classas = models.ForeignKey(
+    room_class = models.ForeignKey(
         RoomClass, related_name='room', null=True, blank=True,
         verbose_name=pgettext_lazy('Room field', 'product class'))
     product_tax = models.ForeignKey(
         RoomTax, related_name='room_tax', blank=True, null=True,
         verbose_name=pgettext_lazy('Room field', 'product class'))
     name = models.CharField(
-        pgettext_lazy('Room field', 'name'),unique=True, max_length=128)
+        pgettext_lazy('Room field', 'name'), unique=True, max_length=128)
+    floor = models.IntegerField(
+        pgettext_lazy('Room field', 'flour'),
+        validators=[MinValueValidator(0)], null=True, blank=True, default=Decimal(0))
     description = models.TextField(
         verbose_name=pgettext_lazy('Room field', 'description'), blank=True, null=True)
     categories = models.ManyToManyField(
@@ -175,26 +178,18 @@ class Room(models.Model, ItemRange, index.Indexed):
     amenities = models.ManyToManyField(
         RoomAmenity, verbose_name=pgettext_lazy('Room field', 'amenities'),
         related_name='rooms_amenities')
-
     price = PriceField(
         pgettext_lazy('Room field', 'price'),
         currency=settings.DEFAULT_CURRENCY, max_digits=12,
         validators=[MinValueValidator(0)], default=Decimal(0), decimal_places=2)
-    wholesale_price = PriceField(
-        pgettext_lazy('Room field', 'Wholesale price'),
-        currency=settings.DEFAULT_CURRENCY, blank=True,null=True, max_digits=12, decimal_places=2)
-
-    available_on = models.DateField(
+    available_on = models.DateTimeField(
         pgettext_lazy('Room field', 'available on'), blank=True, null=True)
     attributes = HStoreField(pgettext_lazy('Room field', 'attributes'),
                              default={})
     updated_at = models.DateTimeField(
         pgettext_lazy('Room field', 'updated at'), auto_now=True, null=True)
-    is_featured = models.BooleanField(
-        pgettext_lazy('Room field', 'is featured'), default=False)
-    low_stock_threshold = models.IntegerField(
-        pgettext_lazy('Room field', 'low stock threshold'),
-        validators=[MinValueValidator(0)], null=True,blank=True, default=Decimal(10))
+    is_booked = models.BooleanField(
+        pgettext_lazy('Room field', 'is booked'), default=False)
 
     objects = RoomManager()
 
@@ -244,7 +239,7 @@ class Room(models.Model, ItemRange, index.Indexed):
         return self.room_price.all().get().daily.gross
 
     def get_weekly_price(self):
-        return self.room_price.all().get().nightly.gross
+        return self.room_price.all().get().weekly.gross
 
     def get_monthly_price(self):
         return self.room_price.all().get().monthly.gross

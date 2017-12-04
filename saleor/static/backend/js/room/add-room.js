@@ -47,6 +47,7 @@ $(function() {
     var price  = dataForm.find('#price');
     var addRoomBtn = dataForm.find('#add-room-btn');
     var amenities = dataForm.find('.amenities');
+    var floor = dataForm.find('.floor');
     var new_amenities = dataForm.find('.new_amenities');
     var new_amenities_btn = dataForm.find('#new_amenities_btn');
     var dayTime = dataForm.find('#daytime');
@@ -128,6 +129,12 @@ $(function() {
             name.nextAll('.help-block:first').addClass('text-warning').html('This field is required');
             return false;
         }
+        if(!floor.val())
+        {
+            floor.nextAll('.help-block:first').addClass('text-warning').html('This field is required');
+            return false;
+        }
+
         if(description.val()){
             dynamicData['description'] = description.val();
         }
@@ -178,6 +185,7 @@ $(function() {
         dynamicData['price'] = price.val();
         dynamicData['track'] = 'add room';
         dynamicData['amenities'] = JSON.stringify(amenities.val());
+        dynamicData['floor'] = floor.val()[0];
 
         // post form data
         addRoomDetails(dynamicData,roomUrl,'post')
@@ -192,7 +200,23 @@ $(function() {
         });
     });
 
-     //    take care of tokenized select field
+      // take care of tokenize2 select field
+
+      floor.on('tokenize:select', function(container){
+        $(this).tokenize2().trigger('tokenize:search', [$(this).tokenize2().input.val()]);
+      });
+
+      floor.on('tokenize:dropdown:show', function(e, value){
+        floor.val('');
+        floor.parents('#parent-div').find('li.token').remove();
+        $(".floor option[data-type='custom']").remove();
+      });
+
+      floor.tokenize2({
+        placeholder: 'Select Floor',
+        tokensMaxItems:1,
+        tokensAllowCustom:true,
+      });
 
       amenities.on('tokenize:select', function(container){
       $(this).tokenize2().trigger('tokenize:search', [$(this).tokenize2().input.val()]);

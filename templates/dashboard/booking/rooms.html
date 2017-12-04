@@ -1,0 +1,142 @@
+{% extends "dashboard/base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+{% load prices_i18n %}
+
+{% block title %}
+  Select Room - {{ table_name }}
+{% endblock %}
+
+{% block menu_book_class %}active{% endblock %}
+
+{% block breadcrumbs %}
+     <li class="active"><a href="{% url 'dashboard:room-list' %}">{{ table_name }} </a></li>
+{% endblock %}
+
+{% block custom_css %}
+<style>
+    .ribbon-container {
+    width: 104px;
+    height: 106px;
+    overflow: hidden;
+    position: absolute;
+    top: -1px;
+    right: -1px;
+}
+.ribbon {
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.6666667;
+    font-weight: 500;
+    text-transform: uppercase;
+    position: relative;
+    padding: 5px 0;
+    left: -11px;
+    top: 25px;
+    width: 150px;
+    color: #fff;
+    letter-spacing: .25px;
+    z-index: 999;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
+    -webkit-box-shadow: 0 4px 6px rgba(0,0,0,.1);
+    box-shadow: 0 4px 6px rgba(0,0,0,.1);
+}
+</style>
+{% endblock %}
+{% block content %}
+
+<div class="row">
+    {% if objects %}
+    <div class="panel panel-flat">
+        <div class="panel-body">
+            <div class="tabbable">
+                <ul class="nav nav-tabs nav-tabs-solid nav-justified">
+                    <li class="active"><a href="#ground" data-toggle="tab" class="legitRipple" aria-expanded="true">Ground Floor</a></li>
+                    <li class=""><a href="#first-floor" data-toggle="tab" class="legitRipple" aria-expanded="false">First Floor</a></li>
+                    <li class=""><a href="#second-floor" data-toggle="tab" class="legitRipple" aria-expanded="false">Second Floor</a></li>
+
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane active" id="ground">
+                       {% for instance in objects %}
+                        {% if instance.floor == 0 %}
+                         <div class="col-sm-6 col-md-3">
+                            <div class="panel panel-body">
+                                {% if instance.is_booked %}
+                                <div class="ribbon-container">
+                                    <div class="ribbon bg-danger">Booked</div>
+                                </div>
+                                {% endif %}
+                                <div class="media no-margin">
+                                    <div class="media-body">
+                                        <h3 class="no-margin text-semibold">{{instance.name}}</h3>
+                                        <span>&nbsp;<br></span>
+                                        <span class="text-uppercase text-size-mini text-muted">
+                                            {% if instance.is_booked %}
+                                             Untill {{instance.available_on}}
+                                            {% else %}
+                                            {% endif %}
+                                        </span>
+                                    </div>
+
+                                    <div class="media-right media-middle">
+                                        <i class="icon-bed2 icon-3x text-blue-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+
+                    </div>
+                    <!--./ground-->
+                    <div class="tab-pane" id="first-floor">
+                        {% for instance in objects %}
+                        {% if instance.floor == 1 %}
+                         <div class="col-sm-6 col-md-3">
+                            <div class="panel panel-body">
+                                {% if instance.is_booked %}
+                                <div class="ribbon-container">
+                                    <div class="ribbon bg-danger">Booked</div>
+                                </div>
+                                {% endif %}
+                                <div class="media no-margin">
+                                    <div class="media-body">
+                                        <h3 class="no-margin text-semibold">{{instance.name}}</h3>
+                                        <span>&nbsp;<br></span>
+                                        <span class="text-uppercase text-size-mini text-muted">
+                                            {% if instance.is_booked %}
+                                             Available on {{instance.available_on}}
+                                            {% else %}
+                                            {% endif %}
+                                        </span>
+                                    </div>
+
+                                    <div class="media-right media-middle">
+                                        <i class="icon-bed2 icon-3x text-blue-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+
+                    </div>
+                    <!--./first-->
+                    <div class="tab-pane" id="second-floor">
+                        No rooms
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

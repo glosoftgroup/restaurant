@@ -67,6 +67,8 @@ def add(request):
             instance.name = request.POST.get('name')
             if request.POST.get('price'):
                 instance.price = request.POST.get('price')
+            if request.POST.get('floor'):
+                instance.floor = request.POST.get('floor')
             if request.POST.get('description'):
                 instance.description = request.POST.get('description')
             instance.save()
@@ -86,6 +88,7 @@ def add(request):
             if request.POST.get('daytime'):
                 pricing.daytime = request.POST.get('daytime')
             if request.POST.get('weekly'):
+                print request.POST.get('weekly')
                 pricing.weekly = request.POST.get('weekly')
             if request.POST.get('monthly'):
                 pricing.monthly = request.POST.get('monthly')
