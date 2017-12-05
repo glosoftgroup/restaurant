@@ -1,6 +1,6 @@
 /* ------------------------------------------------------------------------------
 *
-*  # addproduct js scripts
+*  # add room js scripts
 *
 *  Specific JS code additions for G-POS backend pages
 *
@@ -197,6 +197,11 @@ $(function() {
         })
         .fail(function(error){
             console.log('error');
+            alertUser('Choose a unique name','bg-danger','Error');
+            if(!name.val()){
+            name.nextAll('.help-block:first').addClass('text-warning').html('Name exists is required');
+            return false;
+        }
         });
     });
 

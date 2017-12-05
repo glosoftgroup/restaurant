@@ -41,6 +41,7 @@ $(function() {
     // refresh dom elements
     var newAmenitiesDiv = $('#add_new_amenities');
     var addNewAmBtn = $('#add_new_amenities_btn');
+    var boolRedirect = $('#redirect');
 
     // delete room
     var deleteBtn = $('#delete');
@@ -343,11 +344,21 @@ $(function() {
                   processData: false,
                   contentType: false,
                   success:function(data){
+                    console.log(data);
+                    console.log(typeof data);
                     $.jGrowl('Data sent successfully', {
                       header: 'Well done!',
                       theme: 'bg-success'
                     });
-                    window.location.href = roomListUrl;
+                    if(!boolRedirect.val()){
+                       window.location.href = roomListUrl;
+                    }else{
+                       $('#ribbon'+boolRedirect.data('pk')).removeClass('hidden');
+                       $('#available'+boolRedirect.data('pk')).html('Available on '+data.check_out);
+                       $('#bookbtn'+boolRedirect.data('pk')).html('');
+                       $('#bookbtn'+boolRedirect.data('pk')).removeClass('label-success');
+                       $('#booking-modal').modal('hide');
+                    }
                   },
                   error:function(error){
                     console.log(error);

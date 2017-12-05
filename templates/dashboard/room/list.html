@@ -26,6 +26,37 @@
      .detail-column p{font-size:14px;}
      #addoptionsform label.error{color:#ff7043}
    </style>
+   <style>
+    .ribbon-container {
+    width: 104px;
+    height: 106px;
+    overflow: hidden;
+    position: absolute;
+    top: -1px;
+    right: -1px;
+}
+.ribbon {
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.6666667;
+    font-weight: 500;
+    text-transform: uppercase;
+    position: relative;
+    padding: 5px 0;
+    left: -11px;
+    top: 25px;
+    width: 150px;
+    color: #fff;
+    letter-spacing: .25px;
+    z-index: 993;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
+    -webkit-box-shadow: 0 4px 6px rgba(0,0,0,.1);
+    box-shadow: 0 4px 6px rgba(0,0,0,.1);
+}
+</style>
  {% endblock %}
 
 {% block content %}
@@ -83,8 +114,12 @@
                   {% for option in options %}
                   <tr {% if option.is_booked %}class='danger border-bottom-danger border-top-danger' {% endif %} id="{{option.pk }}">
                     <!-- name -->
+
                     <td class="td" data-href="{% url 'dashboard:room-detail' pk=option.pk %}" data-mtitle="{{option.name}}" data-m="#pdetail">
                         {{option.name}}
+                        <div id="ribbon{{instance.id}}" class="ribbon-container">
+                        <div class="ribbon bg-danger">Booked</div>
+                      </div>
                     </td>
                     <td class="td" data-href="{% url 'dashboard:room-detail' pk=option.pk %}" data-mtitle="{{option.name}}" data-m="#pdetail">
                       <div class="">
@@ -275,7 +310,7 @@
 
  </div>
  </div>
-!-- Blue modal -->
+<!-- Blue modal -->
  <div id="modal_instance" class="modal fade">
    <div class="modal-dialog modal-sm">
      <div class="modal-content">
@@ -398,7 +433,7 @@
         maxVisible: 3,
         leaps: false
         }).on("page", function(event, num){
-            $(".pages-nav").html("Page " + num +" of "+pagination_totalsize); // or some ajax content loading...
+            $(".pages-nav").html("Page " + num +" of "+{{pn}}); // or some ajax content loading...
             $.get(paginationUrl,{page:num},function(data){
                $('#tb').html(data);
             });

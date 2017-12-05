@@ -14,6 +14,8 @@
 {% endblock %}
 
 {% block custom_css %}
+<link href="{% static 'backend/js/plugins/tokenize/tokenize2.css' %}" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="{% static 'backend/js/plugins/pickers/datetimepicker/bootstrap-datetimepicker-standalone.min.css' %}" />
 <style>
     .ribbon-container {
     width: 104px;
@@ -36,7 +38,7 @@
     width: 150px;
     color: #fff;
     letter-spacing: .25px;
-    z-index: 999;
+    z-index: 993;
     -webkit-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
     -o-transform: rotate(45deg);
@@ -54,78 +56,79 @@
         <div class="panel-body">
             <div class="tabbable">
                 <ul class="nav nav-tabs nav-tabs-solid nav-justified">
-                    <li class="active"><a href="#ground" data-toggle="tab" class="legitRipple" aria-expanded="true">Ground Floor</a></li>
-                    <li class=""><a href="#first-floor" data-toggle="tab" class="legitRipple" aria-expanded="false">First Floor</a></li>
-                    <li class=""><a href="#second-floor" data-toggle="tab" class="legitRipple" aria-expanded="false">Second Floor</a></li>
+
+                    {% for floor in floors %}
+                    <li class="{% if floor == '0' %}active{% endif %}">
+                        <a href="#dynamic-floor{{floor}}" data-toggle="tab"    class="legitRipple" aria-expanded="false">
+                         <span class="text-bold">Floor:</span> {{floor}}
+                        </a>
+                    </li>
+                    {% endfor %}
 
                 </ul>
 
                 <div class="tab-content">
-                    <div class="tab-pane active" id="ground">
-                       {% for instance in objects %}
-                        {% if instance.floor == 0 %}
-                         <div class="col-sm-6 col-md-3">
-                            <div class="panel panel-body">
-                                {% if instance.is_booked %}
-                                <div class="ribbon-container">
-                                    <div class="ribbon bg-danger">Booked</div>
-                                </div>
-                                {% endif %}
-                                <div class="media no-margin">
-                                    <div class="media-body">
-                                        <h3 class="no-margin text-semibold">{{instance.name}}</h3>
-                                        <span>&nbsp;<br></span>
-                                        <span class="text-uppercase text-size-mini text-muted">
-                                            {% if instance.is_booked %}
-                                             Untill {{instance.available_on}}
-                                            {% else %}
-                                            {% endif %}
-                                        </span>
-                                    </div>
-
-                                    <div class="media-right media-middle">
-                                        <i class="icon-bed2 icon-3x text-blue-400"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-                        {% endfor %}
-
-                    </div>
-                    <!--./ground-->
-                    <div class="tab-pane" id="first-floor">
+                    {% for floor in floors %}
+                    <div class="tab-pane {% if floor == '0' %}active{% endif %}" id="dynamic-floor{{floor}}">
                         {% for instance in objects %}
-                        {% if instance.floor == 1 %}
-                         <div class="col-sm-6 col-md-3">
-                            <div class="panel panel-body">
-                                {% if instance.is_booked %}
-                                <div class="ribbon-container">
-                                    <div class="ribbon bg-danger">Booked</div>
-                                </div>
-                                {% endif %}
-                                <div class="media no-margin">
-                                    <div class="media-body">
-                                        <h3 class="no-margin text-semibold">{{instance.name}}</h3>
-                                        <span>&nbsp;<br></span>
-                                        <span class="text-uppercase text-size-mini text-muted">
-                                            {% if instance.is_booked %}
-                                             Available on {{instance.available_on}}
-                                            {% else %}
-                                            {% endif %}
-                                        </span>
+                        {% if instance.floor == floor %}
+                         <div class="col-sm-6 col-md-4">
+                            <div class="panel">
+                                <div class="panel-body">
+                                    <div id="ribbon{{instance.id}}" class="ribbon-container {% if not instance.is_booked %}hidden{% endif %}">
+                                        <div class="ribbon bg-danger">Booked</div>
+                                    </div>
+                                    <div class="media no-margin">
+                                        <div class="media-body">
+                                            <h3 class="no-margin text-semibold">{{instance.name}}</h3>
+                                            <span>&nbsp;<br></span>
+                                            <div class="">
+                                               <span class="text-size-small" data-popup="tooltip" title="Day time" data-placement="top">
+                                                   <i class="icon-sun3 text-muted"></i>
+                                                   <span class="text-size-small">{{instance.get_daytime_price}}</span>
+                                               </span> <br>
+                                                <span class="text-size-small" data-popup="tooltip" title="Nightly charge" data-placement="top">
+                                                   <i class="icon-contrast text-muted"></i>
+                                                    <span class="text-size-small">{{instance.get_nightly_price}}</span>
+                                               </span>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="media-right media-middle">
+                                            <i class="icon-bed2 icon-3x text-blue-400"></i>
+                                        </div>
                                     </div>
 
-                                    <div class="media-right media-middle">
-                                        <i class="icon-bed2 icon-3x text-blue-400"></i>
+                                </div>
+
+                                <div class="panel-footer panel-footer-condensed">
+                                    <div class="heading-elements not-collapsible">
+                                        <span class="heading-text">
+                                            <i class="icon-history position-left"></i>
+                                            <span id="available{{instance.pk}}" class="text-uppercase text-size-mini text-muted">
+                                                {% if instance.is_booked %}
+                                                 Available on {{instance.available_on}}
+                                                {% else %}
+                                                 Available
+                                                {% endif %}
+                                            </span>
+                                        </span>
+                                        {% if not instance.is_booked %}
+                                        <span id="bookbtn{{instance.id}}" data-pk="{{instance.pk}}" data-name="{{instance.name}}" class="heading-text pull-right label label-success cursor-pointer animated bounceIn book-room-btn">
+                                            Book
+                                        </span>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                         {% endif %}
                         {% endfor %}
 
                     </div>
+                    {% endfor %}
                     <!--./first-->
                     <div class="tab-pane" id="second-floor">
                         No rooms
@@ -138,5 +141,61 @@
     </div>
     {% endif %}
 </div>
+<!--booking modal-->
+<div id="booking-modal" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h6 class="modal-title">Create a Booking</h6>
+            </div>
 
+            <div id="form-content">
+                <div class="modal-body">
+                   loading
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" disabled class="btn disabled btn-link" data-dismiss="modal">Close</button>
+                    <button type="button" disabled class="btn  disabled btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--./booking modal-->
+{% csrf_token %}
+<input type="hidden" class="pageUrls"
+       data-bookurl="{% url 'dashboard:booking-add' %}"
+      >
+{% endblock %}
+
+{% block custom_js %}
+<script type="text/javascript" src="{% static 'backend/js/room/list-room.js' %}"></script>
+<script type="text/javascript" src="{% static 'backend/js/plugins/forms/selects/bootstrap_multiselect.js' %}"></script>
+<script type="text/javascript" src="{% static 'backend/js/pages/form_multiselect.js' %}"></script>
+<script type="text/javascript" src="{% static 'backend/js/plugins/forms/selects/bootstrap_select.min.js' %}"></script>
+
+<script type="text/javascript" src="{% static 'backend/js/plugins/pickers/datepicker.js' %}"></script>
+<script type="text/javascript" src="{% static 'backend/js/plugins/pickers/datetimepicker/bootstrap-datetimepicker.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'backend/js/plugins/tokenize/tokenize2.js' %}"></script>
+<script type="text/javascript" src="{% static 'backend/js/plugins/vue/vue.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'backend/js/booking/vue/booking.js' %}"></script>
+<script >
+    /* render select field */
+    // Basic select
+    $('.bootstrap-select').selectpicker();
+
+    <!-- remove select duplicates when editing -->
+    var map = {};
+    $("#price_type").each(function(){
+        var value = $(this).text();
+        if (map[value] == null){
+            map[value] = true;
+        } else {
+            $(this).remove();
+        }
+    });
+
+</script>
 {% endblock %}

@@ -167,9 +167,8 @@ class Room(models.Model, ItemRange, index.Indexed):
         verbose_name=pgettext_lazy('Room field', 'product class'))
     name = models.CharField(
         pgettext_lazy('Room field', 'name'), unique=True, max_length=128)
-    floor = models.IntegerField(
-        pgettext_lazy('Room field', 'flour'),
-        validators=[MinValueValidator(0)], null=True, blank=True, default=Decimal(0))
+    floor = models.CharField(
+        pgettext_lazy('Room field', 'name'),  blank=True, null=True, default='', max_length=128)
     description = models.TextField(
         verbose_name=pgettext_lazy('Room field', 'description'), blank=True, null=True)
     categories = models.ManyToManyField(
