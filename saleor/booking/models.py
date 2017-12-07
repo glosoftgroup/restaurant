@@ -8,6 +8,7 @@ from django.utils.translation import pgettext_lazy
 from django.core.validators import MinValueValidator, RegexValidator
 from django_prices.models import PriceField
 from ..room.models import Room
+from saleor.sale.models import PaymentOption
 from ..customer.models import Customer
 
 
@@ -61,4 +62,36 @@ class Book(models.Model):
 
     def __str__(self):
         return str(self.name) + ' #' + str(self.number)
+
+
+class Payment(models.Model):
+    invoice_number = models.CharField(
+        pgettext_lazy('Payment invoice', 'invoice number'),
+        max_length=152, default='', blank=True, null=True)
+    description = models.CharField(
+        pgettext_lazy('Payment field', 'description'),
+        max_length=152, default='', null=True, blank=True)
+    price_type = models.CharField(
+        pgettext_lazy('Payment field', 'price type'),
+        max_length=152, default='', null=True, blank=True)
+    payment_option = models.ForeignKey(
+        PaymentOption, related_name='booking_payment_option', blank=True, null=True, default='',
+        on_delete=models.SET_NULL,
+        verbose_name=pgettext_lazy('Payment field', 'table'))
+    amount_paid = PriceField(
+        pgettext_lazy('Payment field', 'price'),
+        currency=settings.DEFAULT_CURRENCY, max_digits=12,
+        validators=[MinValueValidator(0)], default=Decimal(0), decimal_places=2)
+    customer = models.ForeignKey(
+        Customer, related_name='booking_payment', blank=True, null=True, default='', on_delete=models.SET_NULL,
+        verbose_name=pgettext_lazy('Payment field', 'table'))
+    book = models.ForeignKey(
+        Book, related_name='booking_payment', blank=True, null=True, default='', on_delete=models.SET_NULL,
+        verbose_name=pgettext_lazy('Payment field', 'table'))
+    date = models.DateField(
+        pgettext_lazy('Payment field', 'Date from'),
+        default=now)
+    created = models.DateField(
+        pgettext_lazy('Payment field', 'created'),
+        default=now, editable=False)
 

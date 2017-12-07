@@ -20,6 +20,7 @@ urlpatterns = [
     url(r'^update/(?P<pk>[0-9]+)/$', views.edit, name='booking-edit'),
     url(r'^search/$', views.searchs, name='booking-search'),
     url(r'^paginate/', views.paginate, name='booking_paginate'),
+    url(r'^pay/', views.pay, name='invoice-pay'),
     url(r'compute/price/$', views.compute_room_price, name="compute-room-price"),
     url(r'fetch/amenities/$', views.fetch_amenities, name="fetch-rooms"),
     url(r'fetch/customers/$', views.customer_token, name="fetch-customers-token"),

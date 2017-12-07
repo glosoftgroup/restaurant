@@ -12,7 +12,7 @@
 {% block menu_book_class %}active{% endblock %}
 
 {% block breadcrumbs %}
-     <li class=""><a href="{% url 'dashboard:room-list' %}">{{ table_name }} </a></li>
+     <li class=""><a href="{% url 'dashboard:booking-list' %}">{{ table_name }} </a></li>
      <li class="activate">{{ instance.customer.name }} Invoice | {{instance.invoice_number}}</li>
 {% endblock %}
 
@@ -67,6 +67,7 @@
         <div class="panel-heading">
             <h6 class="panel-title">Invoice</h6>
             <div class="heading-elements">
+                <button type="button" class="btn btn-success btn-xs heading-btn legitRipple" id="checkoutBtn"><i class="icon-printer position-left"></i> Check-out</button>
                 <button type="button" class="btn btn-default btn-xs heading-btn legitRipple" id="printBtn"><i class="icon-printer position-left"></i> Print</button>
             </div>
         <a class="heading-elements-toggle"><i class="icon-more"></i></a></div>
@@ -102,11 +103,11 @@
                         <li><h5>{{instance.customer.name}}</h5></li>
                         <li>{{instance.customer.mobile}}</li>
                         <li>
-                            <a href="invoice_template.html#">
+
                             {% if instance.customer.email %}
                             {{instance.customer.email}}
                             {% endif %}
-                            </a>
+
                         </li>
                     </ul>
                 </div>
@@ -114,7 +115,7 @@
                 <div class="col-md-6 col-lg-3 content-group">
                     <span class="text-muted">Payment Details:</span>
                     <ul class="list-condensed list-unstyled invoice-payment-details">
-                        <li><h5>Total Due: <span class="text-right text-semibold">{{instance.balance.gross}}{{instance.balance.currency}}</span></h5></li>
+                        <li><h5>Total Due: <span class="text-right text-semibold">${balance} {{instance.balance.currency}}</span></h5></li>
 
                     </ul>
                 </div>
@@ -127,7 +128,7 @@
                     <tr>
                         <th colspan="5" class="text-semibold active">CHARGES</th>
                     </tr>
-                    <tr>
+                    <tr class="bg-primary">
                         <th class="col-sm-3">Date</th>
                         <th class="col-sm-1">Customer</th>
                         <th class="col-sm-2">Charge Type</th>
@@ -157,15 +158,32 @@
                     <tr>
                         <th colspan="5" class="text-semibold active">PAYMENTS</th>
                     </tr>
-                    <tr>
+                    <tr class="bg-primary">
                         <th class="col-sm-3">Date</th>
                         <th class="col-sm-1">Description</th>
                         <th class="col-sm-1">Paid By</th>
-                        <th class="col-sm-2">Payment Type</th>
-                        <th class="col-sm-2">Amount</th>
+                        <th class="col-sm-2 hidden">Payment Type</th>
+                        <th class="col-sm-2 text-right">Amount  {{instance.price.currency}}</th>
                     </tr>
                 </thead>
                 <tbody>
+                 <template v-for="payment in payments">
+                    <tr >
+                        <td>${ payment.date }</td>
+                        <td>${ payment.description }</td>
+                        <td>${ payment.customer_name }</td>
+                        <td class="hidden">${ payment.payment_option }</td>
+                        <td class="text-right">${ payment.amount }</td>
+                    </tr>
+                 </template>
+                    <tr>
+                       <td colspan="3" class="text-right">
+
+                        </td>
+                        <td class="text-right text-semibold">
+                           Total: ${total_paid}
+                        </td>
+                    </tr>
                     <tr>
                         <td colspan="5" class="text-center">
                            <button @click="openModal" class="btn btn-success hvr-glow btn-raised legitRipple" id="addPayment">
@@ -215,13 +233,13 @@
                                 <tbody>
                                     <tr>
                                         <th>Amount Paid:</th>
-                                        <td class="text-right">{{ instance.amount_paid.gross }} {{ instance.amount_paid.currency }}</td>
+                                        <td class="text-right">${total_paid} {{ instance.amount_paid.currency }}</td>
                                     </tr>
                                     <tr>
                                         <th>Balance:</th>
                                         <td class="text-right text-primary">
                                             <h5 class="text-semibold">
-                                            {{ instance.balance.gross }} {{ instance.amount_paid.currency }}
+                                            ${balance} {{ instance.amount_paid.currency }}
                                             </h5>
                                         </td>
                                     </tr>
@@ -240,8 +258,11 @@
     </div>
 
     <!--PAYMENT MODAL-->
+    <form id="pay-form">
+        {% csrf_token %}
     <div id="payment-modal" class="modal fade">
         <div class="modal-dialog modal-xs">
+
             <div class="modal-content">
                 <div class="modal-header bg-primary">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -254,12 +275,12 @@
                         <input  v-model="date" name="date" id="date" class="form-control daterange-single" type="text">
                     </div>
                     <div class="form-group">
-                        <label class="text-semibold">Amount:${amount}<span class="text-danger">*</span></label>
-                        <input  v-model.number="amount" name="created" class="form-control" type="number">
+                        <label class="text-semibold">Amount:<span class="text-danger">*</span></label>
+                        <input  v-model.number="amount_paid" name="amount_paid" class="form-control" type="number">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group hidden">
                         <label class="text-semibold">Method:<span class="text-danger">*</span></label>
-                        <select  v-model="method" class="form-control bootstrap-select" id="payment-method">
+                        <select  v-model="payment_option" name="payment_option" class="form-control bootstrap-select" id="payment-method">
                             {% if payment_options %}
                             {% for option in payment_options %}
                             <option value="{{option.id}}">{{option.name}}</option>
@@ -272,22 +293,29 @@
                         <label class="text-semibold">Description (optional):</label>
                         <textarea  v-model="description" class="form-control" name="description" id="description"></textarea>
                     </div>
+                    <input type="hidden" name="invoice_number" id="invoice_number" value="{{instance.invoice_number}}">
+                    <input type="hidden" name="book" id="bookId" value="{{instance.pk}}">
+                    <input type="hidden"  id="balance"  value="{{instance.balance.gross}}">
+                    <input type="hidden"  id="total_paid" value="{{instance.amount_paid.gross}}">
 
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
+                    <button type="button" @click="addPayment" class="btn btn-primary hvr-glow btn-raised legitRipple">Add</button>
                 </div>
             </div>
         </div>
     </div>
     <!--./MODAL-->
 </div>
+</form>
 <!--./booking modal-->
 {% csrf_token %}
 <input type="hidden" class="pageUrls"
        data-bookurl="{% url 'dashboard:booking-add' %}"
+       data-payurl = "{% url 'dashboard:invoice-pay' %}"
+       data-paylisturl = "{% url 'booking-api:api-booking-payment-list' pk=instance.pk %}"
       >
 {% endblock %}
 
@@ -302,6 +330,7 @@
 
 <script type="text/javascript" src="{% static 'backend/js/plugins/tokenize/tokenize2.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/plugins/vue/vue.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'backend/js/plugins/vue/vue-resource.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/booking/vue/invoice.js' %}"></script>
 <script >
     /* render select field */
@@ -309,7 +338,7 @@
     $('.bootstrap-select').selectpicker();
 
     // Single picker
-    $('.daterange-single').datepicker("setDate", new Date());
+
 
 </script>
 {% endblock %}

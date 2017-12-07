@@ -2,11 +2,13 @@ from decimal import Decimal
 from django.shortcuts import get_object_or_404, redirect, render_to_response
 from django.template.response import TemplateResponse
 from django.http import HttpResponse
+from django.core import serializers
 from django.core.paginator import Paginator, PageNotAnInteger, InvalidPage, EmptyPage
 from django.db.models import Q
 
 from ..views import staff_member_required
 from saleor.booking.models import Book as Table
+from saleor.booking.models import Payment
 from saleor.room.models import Room
 from saleor.customer.models import Customer
 from saleor.sale.models import PaymentOption
@@ -189,6 +191,38 @@ def listing(request):
     except TypeError as e:
         error_logger.error(e)
         return HttpResponse('error accessing payment options')
+
+
+@staff_member_required
+def pay(request):
+    global table_name
+    # create instance
+    instance = Payment()
+    if request.method == 'POST':
+        if request.POST.get('invoice_number'):
+            instance.invoice_number = request.POST.get('invoice_number')
+        if request.POST.get('book'):
+            book = Table.objects.get(pk=int(request.POST.get('book')))
+            instance.book = book
+            instance.customer = book.customer
+        if request.POST.get('amount_paid'):
+            instance.amount_paid = request.POST.get('amount_paid')
+        if request.POST.get('payment_option'):
+            instance.payment_option = PaymentOption.objects.get(pk=int(request.POST.get('payment_option')))
+        if request.POST.get('date'):
+            instance.date = request.POST.get('date')
+        if request.POST.get('description'):
+            instance.description = request.POST.get('description')
+        instance.save()
+        book.amount_paid = book.amount_paid.gross + instance.amount_paid.gross
+        book.balance = book.balance.gross - instance.amount_paid.gross
+        book.save()
+        data = {'balance': float(book.balance.gross),
+                'total_paid': float(book.amount_paid.gross)}
+
+        return HttpResponse(json.dumps(data), content_type='application/json')
+
+    return HttpResponse('Invalid request method')
 
 
 @staff_member_required

@@ -1,0 +1,43 @@
+     Table List Api
+
+Table List Api
+
+GET /api/table/
+
+HTTP 200 OK
+Allow: GET, HEAD, OPTIONS
+Content-Type: application/json
+Vary: Accept
+
+{
+    "count": 4,
+    "next": null,
+    "previous": null,
+    "results": [
+        {
+            "id": 1,
+            "name": "1,2",
+            "orders_url": "http://192.168.0.16:8000/api/order/table/1",
+            "new_orders": 4
+        },
+        {
+            "id": 2,
+            "name": "VIP",
+            "orders_url": "http://192.168.0.16:8000/api/order/table/2",
+            "new_orders": 0
+        },
+        {
+            "id": 3,
+            "name": "0,1",
+            "orders_url": "http://192.168.0.16:8000/api/order/table/3",
+            "new_orders": 0
+        },
+        {
+            "id": 4,
+            "name": "1,1",
+            "orders_url": "http://192.168.0.16:8000/api/order/table/4",
+            "new_orders": 0
+        }
+    ]
+}
+
