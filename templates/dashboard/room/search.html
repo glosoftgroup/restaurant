@@ -28,9 +28,16 @@
                     <tbody id="p-tb">
                     {% if options %}
                         {% for option in options %}
-                       <tr class='clickable-row' id="{{option.pk }}">
+                       <tr  id="{{option.pk }}">
                     <!-- name -->
-                    <td class="td" data-href="{% url 'dashboard:room-detail' pk=option.pk %}" data-mtitle="{{option.name}}" data-m="#pdetail">{{option.name}}</td>
+
+                    <td class="td" data-href="{% url 'dashboard:room-detail' pk=option.pk %}" data-mtitle="{{option.name}}" data-m="#pdetail">
+                        {{option.name}}<br>
+                        {% if option.is_booked %}
+                        <mark class="text-size-small">Booked</mark>
+                        {% endif %}
+
+                    </td>
                     <td class="td" data-href="{% url 'dashboard:room-detail' pk=option.pk %}" data-mtitle="{{option.name}}" data-m="#pdetail">
                       <div class="">
                        <span class="text-size-small" data-popup="tooltip" title="Day time" data-placement="top">
@@ -45,7 +52,7 @@
                     </td>
                     <td class="td" data-href="{% url 'dashboard:room-detail' pk=option.pk %}" data-mtitle="{{option.name}}" data-m="#pdetail">
                         {% if option.amenities.all %}
-                         {{option.amenities.all|join:"<i class='text-success'>,</i> "}}
+                         {{option.amenities.all|join:", "}}
                         {% endif %}
 
                     </td>
@@ -72,8 +79,7 @@
                     </td>
                     {% endif %}
                   </tr>
-
-                        {% endfor %}
+                   {% endfor %}
                     {% else %}
                         <tr>
                           <td colspan="6">

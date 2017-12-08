@@ -54,7 +54,7 @@
     {% if objects %}
     <div class="panel panel-flat">
         <div class="panel-body">
-            <div class="tabbable">
+            <div class="tabbable row">
                 <ul class="nav nav-tabs nav-tabs-solid nav-justified">
 
                     {% for floor in floors %}
@@ -67,7 +67,7 @@
 
                 </ul>
 
-                <div class="tab-content">
+                <div class="tab-content row">
                     {% for floor in floors %}
                     <div class="tab-pane {% if floor == '0' %}active{% endif %}" id="dynamic-floor{{floor}}">
                         {% for instance in objects %}
@@ -105,8 +105,8 @@
                                 <div class="panel-footer panel-footer-condensed">
                                     <div class="heading-elements not-collapsible">
                                         <span class="heading-text">
-                                            <i class="icon-history position-left"></i>
-                                             <span id="detailbtn{{instance.id}}" data-pk="{{instance.pk}}" data-name="{{instance.name}}" class=" pull-right label label-primary cursor-pointer animated bounceIn invoice-room-btn {% if not instance.is_booked %} x {% endif %} hvr-glow btn-raised legitRipple">
+
+                                             <span id="detailbtn{{instance.id}}" data-detailurl="{% url 'dashboard:room-detail' pk=instance.pk %}" data-pk="{{instance.pk}}" data-name="{{instance.name}}" class=" pull-right label label-primary cursor-pointer animated bounceIn book-room-detail-btn {% if not instance.is_booked %} x {% endif %} hvr-glow btn-raised legitRipple">
                                                 Detail
                                             </span>
 
@@ -179,6 +179,7 @@
 <script type="text/javascript" src="{% static 'backend/js/plugins/pickers/datepicker.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/plugins/pickers/datetimepicker/bootstrap-datetimepicker.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/plugins/tokenize/tokenize2.js' %}"></script>
+<script type="text/javascript" src="{% static 'backend/js/plugins/pickers/daterangepicker.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/plugins/vue/vue.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/booking/vue/booking.js' %}"></script>
 <script >

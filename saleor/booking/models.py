@@ -52,6 +52,8 @@ class Book(models.Model):
     check_out = models.DateTimeField(
         pgettext_lazy('Book field', 'Date until'),
         default=now)
+    active = models.BooleanField(
+        pgettext_lazy('Book field', 'is booked'), default=True)
     created = models.DateTimeField(
         pgettext_lazy('Book field', 'created'),
         default=now, editable=False)

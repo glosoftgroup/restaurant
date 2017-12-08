@@ -9,6 +9,7 @@ from django.utils.http import is_safe_url
 
 from ..views import staff_member_required
 from saleor.room.models import Room as Table
+from saleor.booking.models import Book
 from saleor.room.models import RoomAmenity, RoomImage, Package, Pricing
 from .forms import RoomImageForm
 from ...decorators import user_trail
@@ -21,6 +22,142 @@ error_logger = logging.getLogger('error_logger')
 
 # global variables
 table_name = 'Rooms'
+
+
+@staff_member_required
+def add(request):
+    if request.method == 'POST':
+        if request.POST.get('pk'):
+            instance = Table.objects.get(pk=int(request.POST.get('pk')))
+            pricing = Pricing.objects.get(room__pk=int(request.POST.get('pk')))
+        else:
+            instance = Table()
+            pricing = Pricing()
+        if request.POST.get('name'):
+            instance.name = request.POST.get('name')
+        if request.POST.get('price'):
+            instance.price = request.POST.get('price')
+        if request.POST.get('floor'):
+            instance.floor = request.POST.get('floor')
+        if request.POST.get('description'):
+            instance.description = request.POST.get('description')
+        if request.POST.get('is_booked'):
+            b = lambda x: True if x > 0 else False
+            instance.is_booked = b(int(request.POST.get('is_booked')))
+        instance.save()
+        # add amenities
+        if request.POST.get('amenities'):
+            choices = json.loads(request.POST.get('amenities'))
+            instance.amenities.clear()
+            for choice in choices:
+                instance.amenities.add(choice)
+            instance.save()
+        # add price packages
+        pricing.room = instance
+        if request.POST.get('daily'):
+            pricing.daily = request.POST.get('daily')
+        if request.POST.get('nightly'):
+            pricing.nightly = request.POST.get('nightly')
+        if request.POST.get('daytime'):
+            pricing.daytime = request.POST.get('daytime')
+        if request.POST.get('weekly'):
+            print request.POST.get('weekly')
+            pricing.weekly = request.POST.get('weekly')
+        if request.POST.get('monthly'):
+            pricing.monthly = request.POST.get('monthly')
+        pricing.save()
+
+        data = {'name': instance.name,
+                'is_booked': instance.is_booked,
+                'pk': instance.pk}
+        return HttpResponse(json.dumps(data), content_type='application/json')
+    else:
+        packages = Package.objects.all()
+        package_json = []
+        for package in packages:
+            package_json.append({'name': str(package.name)})
+        ctx = {'table_name': table_name, 'packages': packages, 'package_json': package_json}
+        return TemplateResponse(request, 'dashboard/room/form.html', ctx)
+
+
+@staff_member_required
+def add_amenities(request):
+    if request.method == 'POST':
+        if request.POST.get('amenities'):
+            choices = json.loads(request.POST.get('amenities'))
+            for choice in choices:
+                try:
+                    RoomAmenity.objects.create(name=choice)
+                except Exception as e:
+                    error_logger.info(e)
+            return HttpResponse(json.dumps({'success': choice}), content_type='application/json')
+        return HttpResponse(json.dumps({'message': 'Amenities required'}), content_type='application/json')
+    else:
+        return HttpResponse(json.dumps({'message', 'Invalid method'}))
+
+
+@staff_member_required
+def delete(request, pk=None):
+    option = get_object_or_404(Table, pk=pk)
+    if request.method == 'POST':
+        try:
+            option.delete()
+            user_trail(request.user.name, 'deleted room : '+ str(option.name), 'delete')
+            info_logger.info('deleted room: '+ str(option.name))
+            return HttpResponse('success')
+        except Exception, e:
+            error_logger.error(e)
+            return HttpResponse(e)
+
+
+@staff_member_required
+def detail(request, pk=None):
+    if request.method == 'GET':
+        try:
+            room = get_object_or_404(Table, pk=pk)
+            book = Book.objects.filter(room__pk=pk).first()
+            ctx = {'room': room, 'book': book}
+            return TemplateResponse(request, 'dashboard/room/detail.html', ctx)
+        except Exception, e:
+            error_logger.error(e)
+            return TemplateResponse(request, 'dashboard/room/detail.html', {'error': e})
+
+
+@staff_member_required
+def edit(request, pk=None):
+    room = get_object_or_404(Table, pk=pk)
+    pricing = Pricing.objects.get(room__pk=room.pk)
+    if request.method == 'GET':
+        ctx = {'table_name': table_name, 'room': room, 'pricing': pricing}
+        return TemplateResponse(request, 'dashboard/room/form.html', ctx)
+    if request.method == 'POST':
+        try:
+            if request.POST.get('name'):
+                room.name = request.POST.get('name')
+            if request.POST.get('price'):
+                room.number = request.POST.get('price')
+                room.save()
+                user_trail(request.user.name, 'updated room : '+ str(room.name),'edit')
+                info_logger.info('updated room : '+ str(room.name))
+                return HttpResponse('success')
+            else:
+                return HttpResponse('invalid response')
+        except Exception, e:
+            error_logger.error(e)
+            print e
+            return HttpResponse(e)
+
+
+@staff_member_required
+def fetch_amenities(request):
+    search = request.GET.get('search')
+    amenities = RoomAmenity.objects.all().filter(name__icontains=str(search))
+    l = []
+    for amenity in amenities:
+        # {"text": "Afghanistan", "value": "AF"},
+        contact = {'text': amenity.name, 'value': amenity.id}
+        l.append(contact)
+    return HttpResponse(json.dumps(l), content_type='application/json')
 
 
 @staff_member_required
@@ -52,146 +189,6 @@ def list(request):
     except TypeError as e:
         error_logger.error(e)
         return HttpResponse('error accessing payment options')
-
-
-@staff_member_required
-def add(request):
-    if request.method == 'POST':
-        if request.POST.get('pk'):
-            instance = Table.objects.get(pk=int(request.POST.get('pk')))
-            pricing = Pricing.objects.get(room__pk=int(request.POST.get('pk')))
-        else:
-            instance = Table()
-            pricing = Pricing()
-        if request.POST.get('name'):
-            instance.name = request.POST.get('name')
-            if request.POST.get('price'):
-                instance.price = request.POST.get('price')
-            if request.POST.get('floor'):
-                instance.floor = request.POST.get('floor')
-            if request.POST.get('description'):
-                instance.description = request.POST.get('description')
-            instance.save()
-            # add amenities
-            if request.POST.get('amenities'):
-                choices = json.loads(request.POST.get('amenities'))
-                instance.amenities.clear()
-                for choice in choices:
-                    instance.amenities.add(choice)
-                instance.save()
-            # add price packages
-            pricing.room = instance
-            if request.POST.get('daily'):
-                pricing.daily = request.POST.get('daily')
-            if request.POST.get('nightly'):
-                pricing.nightly = request.POST.get('nightly')
-            if request.POST.get('daytime'):
-                pricing.daytime = request.POST.get('daytime')
-            if request.POST.get('weekly'):
-                print request.POST.get('weekly')
-                pricing.weekly = request.POST.get('weekly')
-            if request.POST.get('monthly'):
-                pricing.monthly = request.POST.get('monthly')
-            pricing.save()
-
-            data = {'name': instance.name}
-            return HttpResponse(json.dumps(data), content_type='application/json')
-        return HttpResponse(json.dumps({'message': 'Invalid method'}))
-    else:
-        packages = Package.objects.all()
-        package_json = []
-        for package in packages:
-            package_json.append({'name': str(package.name)})
-        ctx = {'table_name': table_name, 'packages': packages, 'package_json': package_json}
-        return TemplateResponse(request, 'dashboard/room/form.html', ctx)
-
-
-@staff_member_required
-def delete(request, pk=None):
-    option = get_object_or_404(Table, pk=pk)
-    if request.method == 'POST':
-        try:
-            option.delete()
-            user_trail(request.user.name, 'deleted room : '+ str(option.name), 'delete')
-            info_logger.info('deleted room: '+ str(option.name))
-            return HttpResponse('success')
-        except Exception, e:
-            error_logger.error(e)
-            return HttpResponse(e)
-
-
-@staff_member_required
-def edit(request, pk=None):
-    room = get_object_or_404(Table, pk=pk)
-    pricing = Pricing.objects.get(room__pk=room.pk)
-    if request.method == 'GET':
-        ctx = {'table_name': table_name, 'room': room, 'pricing': pricing}
-        return TemplateResponse(request, 'dashboard/room/form.html', ctx)
-    if request.method == 'POST':
-        try:
-            if request.POST.get('name'):
-                room.name = request.POST.get('name')
-            if request.POST.get('price'):
-                room.number = request.POST.get('price')
-                room.save()
-                user_trail(request.user.name, 'updated room : '+ str(room.name),'edit')
-                info_logger.info('updated room : '+ str(room.name))
-                return HttpResponse('success')
-            else:
-                return HttpResponse('invalid response')
-        except Exception, e:
-            error_logger.error(e)
-            print e
-            return HttpResponse(e)
-
-
-
-@staff_member_required
-def detail(request, pk=None):
-    if request.method == 'GET':
-        try:
-            option = get_object_or_404(Table, pk=pk)
-            ctx = {'option': option}
-            user_trail(request.user.name, 'access Car details of: ' + str(option.name)+' ','view')
-            info_logger.info('access car details of: ' + str(option.name)+'  ')
-            return TemplateResponse(request, 'dashboard/room/detail.html', ctx)
-        except Exception, e:
-            error_logger.error(e)
-            return TemplateResponse(request, 'dashboard/room/detail.html', {'error': e})
-
-
-def searchs(request):
-    if request.is_ajax():
-        page = request.GET.get('page', 1)
-        list_sz = request.GET.get('size', 10)
-        p2_sz = request.GET.get('psize')
-        q = request.GET.get('q')
-        if list_sz is None:
-            sz = 10
-        else:
-            sz = list_sz
-
-        if q is not None:
-            options = Table.objects.filter(
-                Q(name__icontains=q)
-            ).order_by('-id')
-            paginator = Paginator(options, 10)
-            try:
-                options = paginator.page(page)
-            except PageNotAnInteger:
-                options = paginator.page(1)
-            except InvalidPage:
-                options = paginator.page(1)
-            except EmptyPage:
-                options = paginator.page(paginator.num_pages)
-            if p2_sz:
-                options = paginator.page(page)
-                return TemplateResponse(request, 'dashboard/room/paginate.html', {'options': options,'sz':sz})
-            data = {'options': options,
-                    'pn': paginator.num_pages,
-                    'sz': sz,
-                    'q': q}
-            return TemplateResponse(request, 'dashboard/room/search.html', data)
 
 
 @staff_member_required
@@ -260,33 +257,6 @@ def paginate(request):
 
 
 @staff_member_required
-def fetch_amenities(request):
-    search = request.GET.get('search')
-    amenities = RoomAmenity.objects.all().filter(name__icontains=str(search))
-    l = []
-    for amenity in amenities:
-        # {"text": "Afghanistan", "value": "AF"},
-        contact = {'text': amenity.name, 'value': amenity.id}
-        l.append(contact)
-    return HttpResponse(json.dumps(l), content_type='application/json')
-
-
-@staff_member_required
-def add_amenities(request):
-    if request.method == 'POST':
-        if request.POST.get('amenities'):
-            choices = json.loads(request.POST.get('amenities'))
-            for choice in choices:
-                try:
-                    RoomAmenity.objects.create(name=choice)
-                except Exception as e:
-                    error_logger.info(e)
-            return HttpResponse(json.dumps({'success': choice}), content_type='application/json')
-        return HttpResponse(json.dumps({'message': 'Amenities required'}), content_type='application/json')
-    else:
-        return HttpResponse(json.dumps({'message', 'Invalid method'}))
-
-
 def room_image_edit(request, room_pk, img_pk=None):
     room = get_object_or_404(Table, pk=room_pk)
     if img_pk:
@@ -319,4 +289,38 @@ def room_image_edit(request, room_pk, img_pk=None):
     return TemplateResponse(
         request, 'dashboard/product/product_image_form.html', ctx)
 
+
+@staff_member_required
+def searchs(request):
+    if request.is_ajax():
+        page = request.GET.get('page', 1)
+        list_sz = request.GET.get('size', 10)
+        p2_sz = request.GET.get('psize')
+        q = request.GET.get('q')
+        if list_sz is None:
+            sz = 10
+        else:
+            sz = list_sz
+
+        if q is not None:
+            options = Table.objects.filter(
+                Q(name__icontains=q)
+            ).order_by('-id')
+            paginator = Paginator(options, 10)
+            try:
+                options = paginator.page(page)
+            except PageNotAnInteger:
+                options = paginator.page(1)
+            except InvalidPage:
+                options = paginator.page(1)
+            except EmptyPage:
+                options = paginator.page(paginator.num_pages)
+            if p2_sz:
+                options = paginator.page(page)
+                return TemplateResponse(request, 'dashboard/room/paginate.html', {'options': options,'sz':sz})
+            data = {'options': options,
+                    'pn': paginator.num_pages,
+                    'sz': sz,
+                    'q': q}
+            return TemplateResponse(request, 'dashboard/room/search.html', data)
 

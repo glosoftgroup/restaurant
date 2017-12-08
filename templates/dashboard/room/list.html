@@ -26,37 +26,7 @@
      .detail-column p{font-size:14px;}
      #addoptionsform label.error{color:#ff7043}
    </style>
-   <style>
-    .ribbon-container {
-    width: 104px;
-    height: 106px;
-    overflow: hidden;
-    position: absolute;
-    top: -1px;
-    right: -1px;
-}
-.ribbon {
-    text-align: center;
-    font-size: 12px;
-    line-height: 1.6666667;
-    font-weight: 500;
-    text-transform: uppercase;
-    position: relative;
-    padding: 5px 0;
-    left: -11px;
-    top: 25px;
-    width: 150px;
-    color: #fff;
-    letter-spacing: .25px;
-    z-index: 993;
-    -webkit-transform: rotate(45deg);
-    -ms-transform: rotate(45deg);
-    -o-transform: rotate(45deg);
-    transform: rotate(45deg);
-    -webkit-box-shadow: 0 4px 6px rgba(0,0,0,.1);
-    box-shadow: 0 4px 6px rgba(0,0,0,.1);
-}
-</style>
+
  {% endblock %}
 
 {% block content %}
@@ -69,7 +39,8 @@
               <div class="form-group">
                 {% if perms.sale.add_paymentoption %}
                    
-                  <a href="{% url 'dashboard:room-add' %}" id="addExpenseBtn" class="btn-block btn-primary btn-lg"><i class="icon-plus2"></i> Add</a>
+                  <a href="{% url 'dashboard:room-add' %}"  class=" btn-primary btn-lg hvr-glow btn-raised legitRipple">
+                      <i class="icon-plus2"></i> Add</a>
                 {% endif %}
               </div>
             </div>
@@ -82,13 +53,12 @@
                 </div>
               </div>
             </div>
-            
 
 
       </div>
    </div>
 
-
+ <div class="row">
   <div class="col-md-12">
    <div id="pagination-div">
       <!-- Header and footer fixed -->
@@ -112,14 +82,15 @@
                 <tbody id="tb">
                 {% if options %}
                   {% for option in options %}
-                  <tr {% if option.is_booked %}class='danger border-bottom-danger border-top-danger' {% endif %} id="{{option.pk }}">
+                  <tr  id="{{option.pk }}">
                     <!-- name -->
 
                     <td class="td" data-href="{% url 'dashboard:room-detail' pk=option.pk %}" data-mtitle="{{option.name}}" data-m="#pdetail">
-                        {{option.name}}
-                        <div id="ribbon{{instance.id}}" class="ribbon-container">
-                        <div class="ribbon bg-danger">Booked</div>
-                      </div>
+                        {{option.name}}<br>
+                        {% if option.is_booked %}
+                        <mark class="text-size-small">Booked</mark>
+                        {% endif %}
+
                     </td>
                     <td class="td" data-href="{% url 'dashboard:room-detail' pk=option.pk %}" data-mtitle="{{option.name}}" data-m="#pdetail">
                       <div class="">
@@ -220,7 +191,7 @@
       </div>
     </div><!-- pagination -->
   </div>
-
+ </div>
 </div>
 
 <!-- Blue modal -->

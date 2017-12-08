@@ -63,11 +63,22 @@
 {% block content %}
 
 <div class="row" id="printme">
+    <form id="check-out-form" class="hidden">
+        {% csrf_token %}
+        <input type="hidden" name="pk" id="pk" value="{{instance.room.pk}}">
+        <input type="hidden" name="is_booked" id="is_booked" value="0">
+    </form>
+    <form id="deactivate-form" class="hidden">
+        {% csrf_token %}
+        <input type="hidden" name="pk" value="{{instance.pk}}">
+        <input type="hidden" name="active" id="active" value="0">
+    </form>
     <div class="panel panel-white">
         <div class="panel-heading">
-            <h6 class="panel-title">Invoice</h6>
+            <h6 class="panel-title text-bold">Invoice | {{instance.room.name}}</h6>
             <div class="heading-elements">
-                <button type="button" class="btn btn-success btn-xs heading-btn legitRipple" id="checkoutBtn"><i class="icon-printer position-left"></i> Check-out</button>
+                <button v-if="is_active" type="button" @click="checkOut" class="btn btn-success btn-xs heading-btn legitRipple" id="checkoutBtn"> Check-out</button>
+
                 <button type="button" class="btn btn-default btn-xs heading-btn legitRipple" id="printBtn"><i class="icon-printer position-left"></i> Print</button>
             </div>
         <a class="heading-elements-toggle"><i class="icon-more"></i></a></div>
@@ -215,11 +226,11 @@
                                 {% endif %}
                             </li>
                             <li>
-                                <a href="invoice_template.html#">
+
                                 {% if instance.user.email %}
                                 {{instance.user.email}}
                                 {% endif %}
-                                </a>
+
                             </li>
                         </ul>
                     </div>
@@ -294,6 +305,8 @@
                         <textarea  v-model="description" class="form-control" name="description" id="description"></textarea>
                     </div>
                     <input type="hidden" name="invoice_number" id="invoice_number" value="{{instance.invoice_number}}">
+                    <input type="hidden" name="room_id" id="room_id" value="{{instance.room.pk}}">
+                    <input type="hidden" name="is_active" id="is_active" value="{{instance.active}}">
                     <input type="hidden" name="book" id="bookId" value="{{instance.pk}}">
                     <input type="hidden"  id="balance"  value="{{instance.balance.gross}}">
                     <input type="hidden"  id="total_paid" value="{{instance.amount_paid.gross}}">
@@ -311,10 +324,12 @@
 </div>
 </form>
 <!--./booking modal-->
-{% csrf_token %}
+
 <input type="hidden" class="pageUrls"
        data-bookurl="{% url 'dashboard:booking-add' %}"
        data-payurl = "{% url 'dashboard:invoice-pay' %}"
+       data-checkouturl = "{% url 'dashboard:room-add' %}"
+       data-deactivateurl = "{% url 'dashboard:booking-add' %}"
        data-paylisturl = "{% url 'booking-api:api-booking-payment-list' pk=instance.pk %}"
       >
 {% endblock %}

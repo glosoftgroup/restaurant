@@ -2,7 +2,6 @@ from decimal import Decimal
 from django.shortcuts import get_object_or_404, redirect, render_to_response
 from django.template.response import TemplateResponse
 from django.http import HttpResponse
-from django.core import serializers
 from django.core.paginator import Paginator, PageNotAnInteger, InvalidPage, EmptyPage
 from django.db.models import Q
 
@@ -44,15 +43,14 @@ def add(request):
         try:
             customer = Customer.objects.get(mobile=mobile)
         except:
-            customer = Customer.objects.create(name=customer_name, mobile=mobile)
-        instance.customer = customer
-        if request.POST.get('room'):
             try:
-                room = Room.objects.get(pk=int(request.POST.get('room')))
-                instance.room = room
-            except Exception as e:
-                return HttpResponse(json.dumps({'error': str(e)}), content_type="application/json")
-
+                customer = Customer.objects.create(name=customer_name, mobile=mobile)
+            except:
+                pass
+        try:
+            instance.customer = customer
+        except:
+            pass
         if request.POST.get('total_price'):
             instance.price = request.POST.get('total_price')
         if request.POST.get('amount_paid'):
@@ -71,17 +69,29 @@ def add(request):
             instance.adult = request.POST.get('adult')
         if request.POST.get('description'):
             instance.description = request.POST.get('description')
+        if request.POST.get('active'):
+            b = lambda x: True if x > 0 else False
+            instance.active = b(int(request.POST.get('active')))
+        else:
+            instance.active = True
         instance.user = request.user
         instance.save()
+        if request.POST.get('room'):
+            try:
+                room = Room.objects.get(pk=int(request.POST.get('room')))
+                instance.room = room
+                room.is_booked = True
+                room.available_on = request.POST.get("check_out")
+                room.save()
+            except Exception as e:
+                return HttpResponse(json.dumps({'error': str(e)}), content_type="application/json")
         # compute balance
         instance.balance = instance.price.gross - instance.amount_paid.gross
         instance.save()
-        room.is_booked = True
-        room.available_on = request.POST.get("check_out")
-        room.save()
+
         data = {
                 'name': instance.room.name,
-                'check_out': instance.check_out,
+                'active': instance.active,
                 'room_pk': instance.room.id
                 }
         return HttpResponse(json.dumps(data), content_type='application/json')

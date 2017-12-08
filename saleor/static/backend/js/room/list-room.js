@@ -34,13 +34,14 @@ $(function() {
 
     // dom selectors
     var bookBtn = $('.book-room-btn');
+    var bookDetailBtn = $('.book-room-detail-btn');
     var modal = $('#booking-modal');
     var modalContent = modal.find('#form-content');
 
     bookBtn.on('click',function(){
         roomId = $(this).data('pk');
         roomName = $(this).data('name');
-        console.log('I want to book '+roomName);
+        modal.find('.modal-title').html('Create a booking');
 
         /* initialize GET parameters */
         dynamicData = {};
@@ -77,4 +78,52 @@ $(function() {
             modalContent.html('Error fetching form');
         });
     });
+    /* /.booking */
+
+    // **********************************
+
+    /* book details */
+    bookDetailBtn.on('click',function(){
+        roomId = $(this).data('pk');
+        roomName = $(this).data('name');
+        roomDetailUrl = $(this).data('detailurl');
+        console.log('I want to book '+roomName);
+
+        /* initialize GET parameters */
+        dynamicData = {};
+        dynamicData['room_pk'] = roomId;
+        dynamicData['room_name'] = roomName;
+        dynamicData['track'] = 'loading booking form';
+        modal.find('.modal-title').html('Room Details');
+
+        /* launch modal */
+        modal.modal();
+
+        /* block modal content */
+        modalContent.block({
+            message: '<i class="icon-spinner4 spinner"></i>',
+            overlayCSS: {
+                backgroundColor: '#fff',
+                opacity: 0.8,
+                cursor: 'wait'
+            },
+            css: {
+            	width: 16,
+                border: 0,
+                padding: 0,
+                backgroundColor: 'transparent'
+            }
+        });
+
+        /* remotely fetch form detail */
+        ajaxSky(dynamicData,roomDetailUrl,'get')
+        .done(function(response){
+            modalContent.html(response);
+        })
+        .fail(function(){
+            console.log('failed fetching booking form');
+            modalContent.html('Error fetching form');
+        });
+    });
+    /* details */
 });

@@ -1,77 +1,115 @@
-{% load static %}
-{% if option %}
-    <div class=" detail-column">
-        
+<div class="modal-body">
+    <div class="panelpanel-flat">
+        <div class="panel-heading">
 
-          <div class="form-group">            
-              <label class="text-left" style="font-weight:500">Name:</label>
-            
-              <input type="text" value="{{option.name}}" {{disabled}} name="optname" id="optname" class="form-control">
+            <h6 class="panel-title text-semibold">Floor:{{room.floor}} | {{room.name}}<a class="heading-elements-toggle"><i class="icon-more"></i></a></h6>
+
+            <div class="heading-elements">
+                <ul class="list-inline list-inline-separate heading-text">
+                   <li>
+                        <span class="text-muted position-right">
+                            {% if room.is_booked %}
+                             (booked)
+                            {% else %}
+                             (available)
+                            {% endif %}
+                        </span>
+                    </li>
+                </ul>
             </div>
-        <div class="form-group">
-              <label class="text-left" style="font-weight:500">Number:</label>
 
-              <input type="text" value="{{option.number}}" {{disabled}} name="optnumber" id="optnumber" class="form-control">
+            <a class="heading-elements-toggle"><i class="icon-more"></i></a>
+        </div>
+
+        <div class="panel-body" style="padding: 0px;">
+            <div class="tabbable nav-tabs-vertical nav-tabs-left">
+                <ul class="nav nav-tabs nav-tabs-highlight" style="width:145px;">
+                    <li class="active">
+                        <a href="#room-detail" data-toggle="tab" class="legitRipple" aria-expanded="true">
+                            <i class="position-left"></i>
+                            Room Detail
+                        </a>
+                    </li>
+                    <li class="">
+                        <a href="#left-tab2" data-toggle="tab" class="legitRipple" aria-expanded="false">
+                            <i class="icon-mention position-left"></i>
+                            Availability
+                        </a>
+                    </li>
+
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane has-padding active" id="room-detail">
+                        <!--content-->
+                        <div class="content-group-lg">
+
+                            <h6 class="text-semibold">Pricing</h6>
+                            <ul class="list-inline list-inline-separate heading-text">
+                                <li><span class="text-semibold">{{room.get_nightly_price}}</span> {{room.price.currency}}<span>/night</span></li>
+                                <li><span class="text-semibold">{{room.get_daytime_price}}</span> {{room.price.currency}}<span>/daytime</span></li>
+                                <li><span class="text-semibold">{{room.get_daily_price}}</span> {{room.price.currency}}<span>/Daily</span></li>
+                                <li><span class="text-semibold">{{room.get_weekly_price}}</span> {{room.price.currency}}<span>/Weekly</span></li>
+                                <li><span class="text-semibold">{{room.get_monthly_price}}</span> {{room.price.currency}}<span>/Monthly</span></li>
+                            </ul>
+                            <hr>
+                            <h6 class="text-semibold">Description</h6>
+                            <p>{{room.description}}.</p>
+                            <div class="row">
+                                <div class="content-group">
+                                    <dl>
+                                        {% for amenity in room.amenities.all %}
+                                        <dt class="col-sm-3 text-size-small text-bold text-uppercase">
+                                            <i class="icon-checkmark3 text-blue position-left"></i>
+                                            {{ amenity }}
+                                        </dt>
+                                        {% endfor %}
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                        <!--./content-->
+                    </div>
+
+                    <div class="tab-pane has-padding" id="left-tab2">
+                        <!--Availability-->
+                        {% if book %}
+                          <h6 class="text-semibold">Dates</h6>
+                           <div class="form-group">
+                               <div class="col-md-6">
+                                <label>Check-in Date: </label>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="icon-calendar22"></i></span>
+                                    <span>{{book.check_in}}</span>
+                                </div>
+                               </div>
+                               <div class="col-md-6">
+                                <label>Check-out Date: </label>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="icon-calendar22"></i></span>
+                                    <span style="margin-top:6px;">{{book.check_out}}</span>
+                                </div>
+                               </div>
+                            </div>
+                        {% else %}
+                        <span class="text-semibold">No booking details</span>
+                        {% endif %}
+                        <!--./avalibilty-->
+                    </div>
+
+
+                </div>
             </div>
-
-
+        </div>
     </div>
-<script type="text/javascript" src="{% static 'backend/js/plugins/forms/selects/bootstrap_select.min.js' %}"></script>
-<script type="text/javascript">
-    $('#id_sale_point').selectpicker();
-    var updateOptionBtn = $('#updateOption');
-    var number = $('#number');
-    var optname = $('#optname');
-    var optnumber = $('#optnumber');
-    var sale_point = $('.spoint');
-    var updateUrl = "{% url 'dashboard:update-car' pk=option.pk %}"
-
-    function updatePaymentOption(dynamicData,url,method){
-      dynamicData["csrfmiddlewaretoken"]  = jQuery("[name=csrfmiddlewaretoken]").val();
-      return $.ajax({
-          url: url,
-          type: method,
-          data: dynamicData
-        });
-
-    }
-    // alertUser
-    function alertUser(msg,status='bg-success',header='Well done!')
-    { $.jGrowl(msg,{header: header,theme: status}); }
-    updateOptionBtn.on('click',function(){
-       var name = optname.val();
-       var dynamicData = {};     
-
-       if(!name){
-        alertUser('Name required','bg-danger','Missing Field Error!');
-        return false;
-       }
-       if(number.val){
-        dynamicData['number'] = number.val();
-       }
-       if(optnumber.val()){
-        dynamicData['number'] = optnumber.val();
-       }
-
-       dynamicData['name'] = name;
-       dynamicData['sale_point'] = $('.spoint').val();
-       dynamicData['track'] = 'updating bank';
-
-
-       updatePaymentOption(dynamicData,updateUrl,'post')
-       .done(function(data){
-        alertUser('Updated successfully');
-        window.location.reload();
-       })
-       .fail(function(){
-        alertUser('Error occurred. Try another name','bg-danger','Error!')
-       });
-    });
-
-
-</script>
-{% else %}
-<div class="alert bg-info col-md-12">
-    <h4 class="text-center">No details for this option</h4>
 </div>
-{% endif %}
+<div class="modal-footer">
+    <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+
+</div>
+<script>
+    $('.daterange-basic').daterangepicker({
+        applyClass: 'bg-slate-600',
+        cancelClass: 'btn-default',
+    });
+</script>

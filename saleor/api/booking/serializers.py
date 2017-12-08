@@ -4,7 +4,6 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from saleor.booking.models import Book as Table
 from saleor.booking.models import Payment
-from saleor.customer.models import Customer
 User = get_user_model()
 
 
