@@ -1,77 +1,359 @@
-{% load static %}
-{% if option %}
-    <div class=" detail-column">
+{% extends "dashboard/base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+{% load prices_i18n %}
+{% load business_name %}
+{% load business_logo %}
 
+{% block title %}
+  Invoice - {{ table_name }}
+{% endblock %}
 
-          <div class="form-group">
-              <label class="text-left" style="font-weight:500">Name:</label>
+{% block menu_book_class %}active{% endblock %}
 
-              <input type="text" value="{{option.name}}" {{disabled}} name="optname" id="optname" class="form-control">
+{% block breadcrumbs %}
+     <li class=""><a href="{% url 'dashboard:booking-list' %}">{{ table_name }} </a></li>
+     <li class="activate">{{ instance.customer.name }} Invoice | {{instance.invoice_number}}</li>
+{% endblock %}
+
+{% block custom_css %}
+<link href="{% static 'backend/js/plugins/tokenize/tokenize2.css' %}" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="{% static 'backend/js/plugins/pickers/datetimepicker/bootstrap-datetimepicker-standalone.min.css' %}" />
+<link rel="stylesheet" href="{% static 'backend/js/plugins/pickers/bootstrap_datepicker/css/bootstrap-datepicker.min.css' %}">
+<style>
+    .ribbon-container {
+    width: 104px;
+    height: 106px;
+    overflow: hidden;
+    position: absolute;
+    top: -1px;
+    right: -1px;
+}
+.ribbon {
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.6666667;
+    font-weight: 500;
+    text-transform: uppercase;
+    position: relative;
+    padding: 5px 0;
+    left: -11px;
+    top: 25px;
+    width: 150px;
+    color: #fff;
+    letter-spacing: .25px;
+    z-index: 993;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
+    -webkit-box-shadow: 0 4px 6px rgba(0,0,0,.1);
+    box-shadow: 0 4px 6px rgba(0,0,0,.1);
+}
+@media print {
+   #printBtn {
+      display: none;
+   }
+   #addPayment {
+      display: none;
+   }
+}
+</style>
+{% endblock %}
+{% block content %}
+
+<div class="row" id="printme">
+    <form id="check-out-form" class="hidden">
+        {% csrf_token %}
+        <input type="hidden" name="pk" id="pk" value="{{instance.room.pk}}">
+        <input type="hidden" name="is_booked" id="is_booked" value="0">
+    </form>
+    <form id="deactivate-form" class="hidden">
+        {% csrf_token %}
+        <input type="hidden" name="pk" value="{{instance.pk}}">
+        <input type="hidden" name="active" id="active" value="0">
+    </form>
+    <div class="panel panel-white">
+        <div class="panel-heading">
+            <h6 class="panel-title text-bold">Invoice | {{instance.room.name}}</h6>
+            <div class="heading-elements">
+                <button v-if="is_active" type="button" @click="checkOut" class="btn btn-success btn-xs heading-btn legitRipple" id="checkoutBtn"> Check-out</button>
+
+                <button type="button" class="btn btn-default btn-xs heading-btn legitRipple" id="printBtn"><i class="icon-printer position-left"></i> Print</button>
             </div>
-        <div class="form-group">
-              <label class="text-left" style="font-weight:500">Number:</label>
+        <a class="heading-elements-toggle"><i class="icon-more"></i></a></div>
 
-              <input type="text" value="{{option.number}}" {{disabled}} name="optnumber" id="optnumber" class="form-control">
+        <div class="panel-body no-padding-bottom" >
+            <div class="row">
+                <div class="col-sm-6 content-group">
+                    {% if business_logo %}
+                    <img src="{{business_logo}}" style="max-height:100px;width:auto;"/>
+                    {% endif %}
+
+                    <ul class="list-condensed list-unstyled">
+                        <li>{% business_name %}</li>
+
+                    </ul>
+                </div>
+
+                <div class="col-sm-6 content-group">
+                    <div class="invoice-details">
+                        <h5 class="text-uppercase text-semibold">Invoice #{{instance.invoice_number}}</h5>
+                        <ul class="list-condensed list-unstyled">
+                            <li>CHECK-IN: <span class="text-semibold">{{instance.check_in}}</span></li>
+                            <li>CHECK-OUT: <span class="text-semibold">{{instance.check_out}}</span></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
 
+            <div class="row">
+                <div class="col-md-6 col-lg-9 content-group">
+                    <span class="text-muted">Invoice To:</span>
+                    <ul class="list-condensed list-unstyled">
+                        <li><h5>{{instance.customer.name}}</h5></li>
+                        <li>{{instance.customer.mobile}}</li>
+                        <li>
 
+                            {% if instance.customer.email %}
+                            {{instance.customer.email}}
+                            {% endif %}
+
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col-md-6 col-lg-3 content-group">
+                    <span class="text-muted">Payment Details:</span>
+                    <ul class="list-condensed list-unstyled invoice-payment-details">
+                        <li><h5>Total Due: <span class="text-right text-semibold">${balance} {{instance.balance.currency}}</span></h5></li>
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-lg">
+                <thead>
+                    <tr>
+                        <th colspan="5" class="text-semibold active">CHARGES</th>
+                    </tr>
+                    <tr class="bg-primary">
+                        <th class="col-sm-3">Date</th>
+                        <th class="col-sm-1">Customer</th>
+                        <th class="col-sm-2">Charge Type</th>
+                        <th class="col-sm-3">Rate</th>
+                        <th class="col-sm-2">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <span class="no-margin">{{instance.created}}</span>
+                        </td>
+                        <td>{{instance.customer}}</td>
+                        <td>Room Charge</td>
+                        <td><span class="text-semibold">{{instance.price_type}}</span></td>
+                        <td>{{instance.price.gross}} {{instance.price.currency}}</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <!--payment table-->
+        <div class="table-responsive panel">
+            <table class="table table-lg">
+                <thead>
+                    <tr>
+                        <th colspan="5" class="text-semibold active">PAYMENTS</th>
+                    </tr>
+                    <tr class="bg-primary">
+                        <th class="col-sm-3">Date</th>
+                        <th class="col-sm-1">Description</th>
+                        <th class="col-sm-1">Paid By</th>
+                        <th class="col-sm-2 hidden">Payment Type</th>
+                        <th class="col-sm-2 text-right">Amount  {{instance.price.currency}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                 <template v-for="payment in payments">
+                    <tr >
+                        <td>${ payment.date }</td>
+                        <td>${ payment.description }</td>
+                        <td>${ payment.customer_name }</td>
+                        <td class="hidden">${ payment.payment_option }</td>
+                        <td class="text-right">${ payment.amount }</td>
+                    </tr>
+                 </template>
+                    <tr>
+                       <td colspan="3" class="text-right">
+
+                        </td>
+                        <td class="text-right text-semibold">
+                           Total: ${total_paid}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" class="text-center">
+                           <button @click="openModal" class="btn btn-success hvr-glow btn-raised legitRipple" id="addPayment">
+                               Add Payment
+                           </button>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+
+        <div class="panel-body">
+            <div class="row invoice-payment">
+                <div class="col-sm-7">
+                    <div class="content-group">
+                        <h6 class="test">Authorized person</h6>
+
+                        <ul class="list-condensed list-unstyled text-muted">
+                            <li><h5>
+                                {% if instance.user.name %}
+                                {{instance.user.name}}
+                                {% endif %}
+                            </h5></li>
+                            <li>
+                                {% if instance.user.mobile %}
+                                {{instance.user.mobile}}
+                                {% endif %}
+                            </li>
+                            <li>
+
+                                {% if instance.user.email %}
+                                {{instance.user.email}}
+                                {% endif %}
+
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-sm-5">
+                    <div class="content-group">
+                        <h6>Total due</h6>
+                        <div class="table-responsive no-border">
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <th>Amount Paid:</th>
+                                        <td class="text-right">${total_paid} {{ instance.amount_paid.currency }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Balance:</th>
+                                        <td class="text-right text-primary">
+                                            <h5 class="text-semibold">
+                                            ${balance} {{ instance.amount_paid.currency }}
+                                            </h5>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+
+            <h6>Other information</h6>
+            <p class="text-muted">Thank you for partnering with us. </p>
+        </div>
     </div>
+
+    <!--PAYMENT MODAL-->
+    <form id="pay-form">
+        {% csrf_token %}
+    <div id="payment-modal" class="modal fade">
+        <div class="modal-dialog modal-xs">
+
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h6 class="modal-title">Add Payment</h6>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="text-semibold">Date:<span class="text-danger">*</span></label>
+                        <input  v-model="date" name="date" id="date" class="form-control daterange-single" type="text">
+                    </div>
+                    <div class="form-group">
+                        <label class="text-semibold">Amount:<span class="text-danger">*</span></label>
+                        <input  v-model.number="amount_paid" name="amount_paid" class="form-control" type="number">
+                    </div>
+                    <div class="form-group hidden">
+                        <label class="text-semibold">Method:<span class="text-danger">*</span></label>
+                        <select  v-model="payment_option" name="payment_option" class="form-control bootstrap-select" id="payment-method">
+                            {% if payment_options %}
+                            {% for option in payment_options %}
+                            <option value="{{option.id}}">{{option.name}}</option>
+                            {% endfor %}
+                            {% endif %}
+
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="text-semibold">Description (optional):</label>
+                        <textarea  v-model="description" class="form-control" name="description" id="description"></textarea>
+                    </div>
+                    <input type="hidden" name="invoice_number" id="invoice_number" value="{{instance.invoice_number}}">
+                    <input type="hidden" name="room_id" id="room_id" value="{{instance.room.pk}}">
+                    <input type="hidden" name="is_active" id="is_active" value="{{instance.active}}">
+                    <input type="hidden" name="book" id="bookId" value="{{instance.pk}}">
+                    <input type="hidden"  id="balance"  value="{{instance.balance.gross}}">
+                    <input type="hidden"  id="total_paid" value="{{instance.amount_paid.gross}}">
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+                    <button type="button" @click="addPayment" class="btn btn-primary hvr-glow btn-raised legitRipple">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--./MODAL-->
+</div>
+</form>
+<!--./booking modal-->
+
+<input type="hidden" class="pageUrls"
+       data-bookurl="{% url 'dashboard:booking-add' %}"
+       data-payurl = "{% url 'dashboard:invoice-pay' %}"
+       data-checkouturl = "{% url 'dashboard:room-add' %}"
+       data-deactivateurl = "{% url 'dashboard:booking-add' %}"
+       data-paylisturl = "{% url 'booking-api:api-booking-payment-list' pk=instance.pk %}"
+      >
+{% endblock %}
+
+{% block custom_js %}
+<script type="text/javascript" src="{% static 'backend/js/room/list-room.js' %}"></script>
+<script type="text/javascript" src="{% static 'backend/js/plugins/forms/selects/bootstrap_multiselect.js' %}"></script>
+<script type="text/javascript" src="{% static 'backend/js/pages/form_multiselect.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/plugins/forms/selects/bootstrap_select.min.js' %}"></script>
-<script type="text/javascript">
-    $('#id_sale_point').selectpicker();
-    var updateOptionBtn = $('#updateOption');
-    var number = $('#number');
-    var optname = $('#optname');
-    var optnumber = $('#optnumber');
-    var sale_point = $('.spoint');
-    var updateUrl = "{% url 'dashboard:update-car' pk=option.pk %}"
 
-    function updatePaymentOption(dynamicData,url,method){
-      dynamicData["csrfmiddlewaretoken"]  = jQuery("[name=csrfmiddlewaretoken]").val();
-      return $.ajax({
-          url: url,
-          type: method,
-          data: dynamicData
-        });
+<script type="text/javascript" src="{% static 'backend/js/plugins/pickers/datepicker.js' %}"></script>
+<script type="text/javascript" src="{% static 'backend/js/plugins/pickers/datetimepicker/bootstrap-datetimepicker.min.js' %}"></script>
 
-    }
-    // alertUser
-    function alertUser(msg,status='bg-success',header='Well done!')
-    { $.jGrowl(msg,{header: header,theme: status}); }
-    updateOptionBtn.on('click',function(){
-       var name = optname.val();
-       var dynamicData = {};
+<script type="text/javascript" src="{% static 'backend/js/plugins/tokenize/tokenize2.js' %}"></script>
+<script type="text/javascript" src="{% static 'backend/js/plugins/vue/vue.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'backend/js/plugins/vue/vue-resource.js' %}"></script>
+<script type="text/javascript" src="{% static 'backend/js/booking/vue/invoice.js' %}"></script>
+<script >
+    /* render select field */
+    // Basic select
+    $('.bootstrap-select').selectpicker();
 
-       if(!name){
-        alertUser('Name required','bg-danger','Missing Field Error!');
-        return false;
-       }
-       if(number.val){
-        dynamicData['number'] = number.val();
-       }
-       if(optnumber.val()){
-        dynamicData['number'] = optnumber.val();
-       }
-
-       dynamicData['name'] = name;
-       dynamicData['sale_point'] = $('.spoint').val();
-       dynamicData['track'] = 'updating bank';
-
-
-       updatePaymentOption(dynamicData,updateUrl,'post')
-       .done(function(data){
-        alertUser('Updated successfully');
-        window.location.reload();
-       })
-       .fail(function(){
-        alertUser('Error occurred. Try another name','bg-danger','Error!')
-       });
-    });
+    // Single picker
 
 
 </script>
-{% else %}
-<div class="alert bg-info col-md-12">
-    <h4 class="text-center">No details for this option</h4>
-</div>
-{% endif %}
+{% endblock %}

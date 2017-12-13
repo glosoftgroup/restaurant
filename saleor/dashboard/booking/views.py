@@ -154,16 +154,12 @@ def delete(request, pk=None):
 @staff_member_required
 def detail(request, pk=None):
     global table_name
-    if request.method == 'GET':
-        try:
-            option = get_object_or_404(Table, pk=pk)
-            ctx = {'option': option}
-            user_trail(request.user.name, 'access Car details of: ' + str(option.name)+' ','view')
-            info_logger.info('access car details of: ' + str(option.name)+'  ')
-            return TemplateResponse(request, 'dashboard/'+table_name.lower()+'/detail.html', ctx)
-        except Exception, e:
-            error_logger.error(e)
-            return TemplateResponse(request, 'dashboard/'+table_name.lower()+'/detail.html', {'error': e})
+    if pk:
+        payment_options = PaymentOption.objects.all()
+        instance = Table.objects.filter(room__pk=pk).first()
+        ctx = {'table_name': table_name, 'instance': instance, 'payment_options': payment_options}
+        return TemplateResponse(request, 'dashboard/' + table_name.lower() + '/detail.html', ctx)
+    return HttpResponse('Invalid Request. Booking id required')
 
 
 @staff_member_required
@@ -191,32 +187,12 @@ def invoice(request, pk=None):
 @staff_member_required
 def listing(request):
     global table_name
-    try:
-        options = Table.objects.all().order_by('-id')
-        page = request.GET.get('page', 1)
-        paginator = Paginator(options, 10)
-        try:
-            options = paginator.page(page)
-        except PageNotAnInteger:
-            options = paginator.page(1)
-        except InvalidPage:
-            options = paginator.page(1)
-        except EmptyPage:
-            options = paginator.page(paginator.num_pages)
-        data = {
+    data = {
             "table_name": table_name,
-            "options": options,
-            "pn": paginator.num_pages
         }
-        user_trail(request.user.name, 'accessed '+table_name+' List', 'views')
-        info_logger.info('User: ' + str(request.user.name) + 'accessed '+table_name+' List Page')
-        if request.GET.get('initial'):
-            return HttpResponse(paginator.num_pages)
-        else:
-            return TemplateResponse(request, 'dashboard/'+table_name.lower()+'/list.html', data)
-    except TypeError as e:
-        error_logger.error(e)
-        return HttpResponse('error accessing payment options')
+    user_trail(request.user.name, 'accessed '+table_name+' List', 'views')
+
+    return TemplateResponse(request, 'dashboard/'+table_name.lower()+'/list.html', data)
 
 
 @staff_member_required

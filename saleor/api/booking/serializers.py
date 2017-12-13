@@ -9,6 +9,8 @@ User = get_user_model()
 
 class BookingListSerializer(serializers.ModelSerializer):
     price_amount = serializers.SerializerMethodField()
+    room_name = serializers.SerializerMethodField()
+    customer_name = serializers.SerializerMethodField()
     booking_edit = serializers.HyperlinkedIdentityField(view_name='dashboard:booking-edit')
     booking_delete = serializers.HyperlinkedIdentityField(view_name='dashboard:booking-delete')
 
@@ -24,8 +26,8 @@ class BookingListSerializer(serializers.ModelSerializer):
                   'check_in',
                   'check_out',
                   'active',
-                  'customer',
-                  'room',
+                  'customer_name',
+                  'room_name',
                   'user',
                   'price_amount',
                   'created',
@@ -35,6 +37,12 @@ class BookingListSerializer(serializers.ModelSerializer):
 
     def get_price_amount(self, obj):
         return obj.price.gross
+
+    def get_room_name(self, obj):
+        return obj.room.name
+
+    def get_customer_name(self, obj):
+        return obj.customer.name
 
 
 class PaymentListSerializer(serializers.ModelSerializer):

@@ -10,7 +10,7 @@
                     <li>
                        {% if room.is_booked %}
                              <span class="label label-success hvr-glow btn-raised legitRipple">
-                                 <a href="{% url 'dashboard:booking-invoice' pk=book.pk %}" class="text-white" >
+                                 <a href="{% url 'dashboard:booking-invoice' pk=room.pk %}" class="text-white" >
                                      Open invoice
                                  </a>
                              </span>

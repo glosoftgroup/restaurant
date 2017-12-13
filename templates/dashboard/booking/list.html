@@ -15,15 +15,33 @@
 {% block menu_booking_class %}active{% endblock %}
  {% block custom_css %}
    <style type="text/css">
-     .clickable-row td.td{
-      cursor: pointer;
-     }
-     tr.nb td{border:0px;}
-     .nb{border:0px;}
-     .table{border:1px solid #ccc}
-     #addExpenseTable{display:none;}
-     .detail-column p{font-size:14px;}
-     #addoptionsform label.error{color:#ff7043}
+      .theme_xbox .pace_activity, .theme_xbox .pace_activity::after, .theme_xbox .pace_activity::before, .theme_xbox_sm .pace_activity, .theme_xbox_sm .pace_activity::after, .theme_xbox_sm .pace_activity::before, .theme_xbox_xs .pace_activity, .theme_xbox_xs .pace_activity::after, .theme_xbox_xs .pace_activity::before {
+        border-radius: 50%;
+        border: 1px solid transparent;
+            border-top-width: 1px;
+            border-right-width: 1px;
+            border-bottom-width: 1px;
+            border-left-width: 1px;
+            border-top-color: transparent;
+        border-top-color: #1649fc;
+    }
+    .pace-demo {
+        background-color:#fff;
+    }
+    @media print {
+       #printBtn {
+          display: none;
+       }
+       #addPayment {
+          display: none;
+       }
+       .media-none {
+          display: none;
+       }
+       #media-none {
+          display: none;
+       }
+    }
    </style>
  {% endblock %}
 
@@ -36,7 +54,6 @@
               <label style="visibility: hidden;"> Book</label>
               <div class="form-group">
                 {% if perms.sale.add_paymentoption %}
-                   
                   <a href="{% url 'dashboard:booking-add' %}" id="addExpenseBtn" class="btn-block btn-primary btn-lg">
                       <i class="icon-plus2"></i> Book
                   </a>
@@ -52,27 +69,61 @@
                 </div>
               </div>
             </div>
+            <div class="col-md-2">
+              <div class="form-group">
+                 <label>Status</label>
+                 <select v-model="status" @change="inputChangeEvent" class="bootstrap-select" style="display: none;" data-width="100%" tabindex="-98">
+                    <option value="all" selected>All</option>
+                    <option value="True">Booked</option>
+                    <option value="False">Not Booked</option>
+                  </select>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <label>pick a date</label>
+              <div class="form-group">
+                <div class="input-group">
+                    <span v-datepicker></span>
+                  <input v-model="date" id="date" @change="inputChangeEvent" @blur="inputChangeEvent" class="form-control daterange-single" type="text" placeholder="yyyy-mm-dd">
+                  <span class="input-group-addon"><i class="icon-calendar22"></i></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2">
+             <label>Export</label>
+              <div class="form-group">
+                 <select v-model="exportType" @change="exportItems" class="bootstrap-select" style="display: none;" data-width="100%" tabindex="-98">
+                    <option value="none" >Option</option>
+                    <option value="pdf" >export pdf</option>
+                    <option value="excel" >export excel</option>
+                  </select>
+              </div>
+            </div>
 
       </div>
    </div>
 
 <div class="row">
+
   <div class="col-md-12">
    <div id="pagination-div">
       <!-- Header and footer fixed -->
-      <div class="panel panel-flat">
+      <div class="panel panel-flat" id="printme">
         <div class="panel-body">
-        <div class="room-responsive">
+            <div class="col-md-12">
+                <h5 class="text-center text-bold">Room Booking List</h5>
+            </div>
+        <div class="">
           <table class="table room-striped room-hover dataroom-header-footer" style="border-bottom:1px solid #ddd;">
                 <thead>
                   <tr class="bg-primary">
-                    <th>Invoice No.</th>
+                    <th>Invoice</th>
                     <th>Room</th>
-                    <th>Days In</th>
+                    <th>Days</th>
                     <th>Check-in</th>
                     <th>Check-out</th>
                     <th>Customer</th>
-                    <th>Total Cost</th>
+                    <th>Cost</th>
 
                     {% if perms.room.delete_room %}
                     <th class="text-center">Options</th>
@@ -80,23 +131,40 @@
                   </tr>
                 </thead>
                 <tbody id="tb">
+                <!--loader-->
+                <tr v-show="loader" class="text-center">
+                    <td colspan="8">
+                        <div class="pace-demo">
+                            <div class="theme_xbox"><div class="pace_progress" data-progress-text="60%" data-progress="60"></div><div class="pace_activity"></div></div>
+                        </div>
+                    </td>
+                </tr>
+                <!--listing template-->
                 <template v-for="item in items">
                     <tr>
-                        <td>${item.invoice_number}</td>
-                        <td>${item.room}</td>
+                        <td>
+                            ${item.invoice_number}<br>
+                            <span v-show="item.active"><mark>active</mark></span>
+                        </td>
+                        <td>${item.room_name}</td>
                         <td>${item.days}</td>
                         <td>${item.check_in}</td>
                         <td>${item.check_out}</td>
-                        <td>${item.customer}</td>
+                        <td>${item.customer_name}</td>
                         <td>${item.price_amount}</td>
-                        {% if perms.sale.delete_room %}
+
                         <!-- actions -->
+                        <style>
+                        .is-open {
+                            z-index: 100 !important;
+                            }
+                         .input-group .btn-group .form-control, .input-group-btn .btn { z-index: inherit !important; }</style>
                         <td class="text-center">
                             <div class="btn-group">
-                            <button type="button" class="btn btn-default dropdown-toggle legitRipple" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <button  type="button" class="btn btn-default dropdown-toggle legitRipple" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             action <span class="roomet"></span>
                             </button>
-                            <ul class="dropdown-menu edit-dropdown">
+                            <ul class="dropdown-menu edit-dropdown" >
                                   <li class="td"><a :href="item.booking_edit"><i class="icon-pencil7"></i> EDIT</a>
                                   </li>
                                 <li>
@@ -108,37 +176,33 @@
                             </ul>
                           </div>
                         </td>
-                        {% endif %}
+
                     </tr>
                 </template>
-                {% if options %}
 
-                {% else %}
-                    <tr>
-                      <td colspan="6">
-                        <h2 class="text-center">
-                          No Data Available
-                        </h2>
-                      </td>
-                    </tr>
-                {% endif %}
-                  </tbody>
+                <!--no data template-->
+                <tr v-if="items.length == 0 && !loader" class="text-center">
+                    <td colspan="8" class="text-bold animated zoomIn">
+                        No Data Found !
+                    </td>
+                </tr>
+                </tbody>
            </table>
 
         </div>
         </div>
-          {% if options %}                          
+
          <style type="text/css">
            .pagination{margin-bottom: 0px;}
          </style> 
-         <div class="row">   
+         <div class="row media-none">
          <div class="col-md-12">               
           <div class="col-md-4">
            <div class="col-md-12">
             <div class="col-md-6 mt-10">
              <label>display list size</label>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6 media-none">
               <div class="form-group">
                  <select v-model="page_size" @change="inputChangeEvent" class="bootstrap-select" style="display: none;" data-width="100%" tabindex="-98">
                     <option value="10" selected>No:</option>
@@ -150,20 +214,19 @@
             </div>
           </div>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-4" id="media-none">
               <div class="text-center bootpag-callback p2-pag" style="">
             </div>
            </div>
             <div class="col-md-4">
              <div class="col-md-12 mt-5">
-              <div class="pull-right pages-nav">Page 1 of {{pn}}</div>
+              <div class="pull-right pages-nav"></div>
              </div>
             </div>
           </div>
          </div>                 
          <input type="hidden" id="page_size" val="">
-              
-          {% endif %}
+
       </div>
     </div><!-- pagination -->
   </div>
@@ -293,7 +356,8 @@
   <script type="text/javascript" src="{% static 'backend/js/plugins/forms/selects/bootstrap_multiselect.js' %}"></script>
   <script type="text/javascript" src="{% static 'backend/js/pages/form_multiselect.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/plugins/forms/selects/bootstrap_select.min.js' %}"></script>
-     <script type="text/javascript" src="{% static 'backend/js/plugins/pagination/jquery.twbsPagination.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'backend/js/plugins/pagination/jquery.twbsPagination.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'backend/js/plugins/loaders/progressbar.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/plugins/vue/vue.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/plugins/vue/vue-resource.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/booking/vue/listing.js' %}"></script>
@@ -301,267 +365,7 @@
   var paginationSearchUrl = "{% url 'dashboard:booking-search' %}";
   var paginationUrl = "{% url 'dashboard:booking_paginate' %}";
   $(document).ready(function() {
-  $('.bootstrap-select').selectpicker()
-
-      $('.dele-btn').on('click',function(){
-        alert('sdfsdfsdd');
-        $('#modal_mini').modal();
-    });
-
-      $('.modal-trigger').on('click', function (e) {
-
-         var url = $(this).data('href')
-         var prompt_text = $(this).data('title');
-         var username = $(this).data('name');
-         var modal = $(this).data('ta');
-         var id = $(this).data('id');
-         $('.del').attr('data-id', id);
-         $('.del').attr('data-href', url);
-         $('.modal-title').html(prompt_text);
-         $(modal).modal();
-         $('.delete_form').attr('action',url);
-      });
-
-      /* clicked the submit button */
-      $('.del').on('click', function (e) {
-          var f = document.getElementById('delform');
-          var formData = new FormData(f);
-          var id = $(this).data('id');
-          var url = $(this).data('href');
-          console.log(this);
-          $.ajax({
-              url: url,
-              type: "POST",
-              data: formData,
-              processData: false,
-              contentType: false,
-              success:function(data){
-                $('#modal_instance').modal('hide');
-                if(!data.error){
-                $.jGrowl('room deleted successfully', {
-                  header: 'Well done!',
-                  theme: 'bg-success'
-                });
-                $('#tb #'+id).remove();
-                window.location.reload();
-               }else{
-                $.jGrowl(data.error, {
-                  header: 'Error!',
-                  theme: 'bg-danger'
-                });
-               
-               }            
-              },
-              error:function(error){
-                console.log(error);
-                $.jGrowl('Error deleting Staff', {
-                    header: 'Oh snap!',
-                    theme: 'bg-danger'
-                });
-              }
-          });
-      });
-
-
-      var delay = (function(){
-        var timer = 0;
-        return function(callback, ms){
-          clearTimeout (timer);
-          timer = setTimeout(callback, ms);
-        };
-      })();
-
-
-
-    var petty_cash_balance = 0;
-    
-
-    jQuery.validator.addMethod("greaterThanZero", function(value, element) {
-        return this.optional(element) || (parseFloat(value) <= petty_cash_balance);
-    }, "* more than petty cash amount (KShs."+ petty_cash_balance +" )");
-
-      //** validate form & submit
-      $('#addoptionsform').validate({
-        onkeyup: function(element) {$(element).valid()},
-        rules:{           
-          name:{
-            required: "please provide the name"
-          },
-          
-        },
-        submitHandler: function() {
-          var f = document.getElementById('addoptionsform');
-          var formData = new FormData(f);
-          if (formData) {
-                $.ajax({
-                    url: "{% url 'dashboard:room-add' %}",
-                    type: "POST",
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success:function(data){
-                         $('#addoptionsform')[0].reset();
-                         $('#addExpenseTable').slideUp();
-
-                         $.ajax({ url: paginationUrl,type: 'GET',data: {page:1, size:10}, async:false,success: function(data){
-                            $('#pagination-div').html(data);
-                         }});
-                         $.jGrowl('message sent successfully.', {
-                            header: 'Well done!',
-                            theme: 'bg-success'
-                         });
-
-
-                    },
-                    error:function(error){
-                      console.log(error);
-                      $.jGrowl('Change a few things up and try sending again', {
-                          header: 'Oh snap!',
-                          theme: 'bg-danger'
-                      });
-                    }
-                });
-            }
-        }
-      });
-
-
-     //**@ display size select
-    $('.list-sz').selectpicker().on('change', function(){
-        var listSizeVal = $(this).val();
-        var searchData = $('.search_user').val();
-        var groupSizeVal = $('.group-sz').find(":selected").val();
-        var url = paginationSearchUrl;
-
-        if(searchData && groupSizeVal && groupSizeVal != 'all' && groupSizeVal !='none'){
-            if(listSizeVal != '0'){
-               $.ajax({ url:url, type: 'GET',data: {page:1, q:searchData, size:listSizeVal, gid:groupSizeVal},success: function(data){
-                          $('#pagination-div').html(data);
-                }});
-            }else{
-               $.ajax({ url:url, type: 'GET',data: {page:1, q:searchData, size:10, gid:groupSizeVal},success: function(data){
-                          $('#pagination-div').html(data);
-                }});
-            }
-       }else if(searchData){
-           if(listSizeVal != '0'){
-                $.ajax({ url:url, type: 'GET',data: {page:1, q:searchData, size:listSizeVal},success: function(data){
-                          $('#pagination-div').html(data);
-                }});
-           }else{
-               $.ajax({ url:url, type: 'GET',data: {page:1, q:searchData, size:10},success: function(data){
-                          $('#pagination-div').html(data);
-                }});
-            }
-
-       }else if(groupSizeVal && (groupSizeVal != 'all' && groupSizeVal !='none')){
-           if(listSizeVal != '0'){
-                $.get(paginationUrl,{page:1,gid:groupSizeVal, size:listSizeVal},function(data){
-                 $('#pagination-div').html(data);
-               });
-           }else{
-                $.get(paginationUrl,{page:1,gid:groupSizeVal, size:10},function(data){
-                 $('#pagination-div').html(data);
-               });
-
-           }
-       }else{
-           if(listSizeVal != '0'){
-               $.ajax({ url: paginationUrl,type: 'GET',data: {page:1, size:listSizeVal}, async:false,success: function(data){
-                  $('#pagination-div').html(data);
-              }});
-           }else{
-                $.ajax({ url: paginationUrl,type: 'GET',data: {page:1, size:10}, async:false,success: function(data){
-                      $('#pagination-div').html(data);
-                }});
-           }
-       }
-
-     });
-
-     //**@ group name select
-    $('.group-sz').selectpicker({
-          iconBase: 'fa',
-          tickIcon: 'fa-dot-circle-o'
-    }).on('change', function(){
-
-       var group_id = $(this).val();
-       var searchData = $('.search_user').val();
-       var listSizeVal = $('.list-sz').find(":selected").val();
-       var url = paginationSearchUrl;
-
-       if(searchData && listSizeVal && listSizeVal != '0'){
-            if(group_id == 'all' || group_id=='none'){
-               $.ajax({ url:url, type: 'GET',data: {page:1, q:searchData, size:listSizeVal},success: function(data){
-                      $('#pagination-div').html(data);
-               }});
-            }else{
-               $.ajax({ url:url, type: 'GET',data: {page:1, q:searchData, size:listSizeVal, gid:group_id},success: function(data){
-                          $('#pagination-div').html(data);
-                }});
-           }
-       }else if(searchData){
-            if(group_id == 'all' || group_id=='none'){
-               $.ajax({ url:url, type: 'GET',data: {page:1, q:searchData},success: function(data){
-                      $('#pagination-div').html(data);
-               }});
-            }else{
-               $.ajax({ url:url, type: 'GET',data: {page:1, q:searchData, size:10, gid:group_id},success: function(data){
-                          $('#pagination-div').html(data);
-                }});
-           }
-       }else if(listSizeVal && listSizeVal != '0'){
-           if(group_id == 'all' || group_id=='none'){
-               $.ajax({ url: paginationUrl,type: 'GET',data: {page:1, size:listSizeVal}, async:false,success: function(data){
-                  $('#pagination-div').html(data);
-              }});
-           }else{
-                $.get(paginationUrl,{page:1,gid:group_id, size:listSizeVal},function(data){
-                 $('#pagination-div').html(data);
-               });
-           }
-       }else{
-           if(group_id == 'all' || group_id=='none'){
-               $.ajax({ url: paginationUrl,type: 'GET',data: {page:1, size:10}, async:false,success: function(data){
-                  $('#pagination-div').html(data);
-              }});
-           }else{
-                $.get(paginationUrl,{page:1,gid:group_id},function(data){
-                 $('#pagination-div').html(data);
-               });
-           }
-       }
-
-    });
-
-    $('.search_user').keyup(function() {
-        var search_text = $(this).val();
-        var listSizeVal = $('.list-sz').find(":selected").val();
-        var groupSizeVal = $('.group-sz').find(":selected").val();
-        var url = paginationSearchUrl;
-
-        delay(function(){
-            if((listSizeVal && listSizeVal != '0') && groupSizeVal && (groupSizeVal != 'all' && groupSizeVal !='none')){
-                $.ajax({ url:url, type: 'GET',data: {page:1, q:search_text, size:listSizeVal, gid:groupSizeVal},success: function(data){
-                          $('#pagination-div').html(data);
-                }});
-            }else if(listSizeVal && listSizeVal != '0'){
-                $.ajax({ url:url, type: 'GET',data: {page:1, q:search_text, size:listSizeVal},success: function(data){
-                          $('#pagination-div').html(data);
-                }});
-            }else if(groupSizeVal && (groupSizeVal != 'all' && groupSizeVal !='none')){
-                $.ajax({ url:url, type: 'GET',data: {page:1, q:search_text, size:10, gid:groupSizeVal},success: function(data){
-                          $('#pagination-div').html(data);
-                }});
-            }else{
-               $.ajax({ url:url, type: 'GET',data: {page:1, q:search_text},success: function(data){
-                      $('#pagination-div').html(data);
-               }});
-            }
-        }, 500 );
-
-      });
-
+  $('.bootstrap-select').selectpicker();
 
 
   });
