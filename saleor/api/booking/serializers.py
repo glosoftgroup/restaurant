@@ -1,6 +1,7 @@
-# table rest api serializers
+# booking rest api serializers
 
 from rest_framework import serializers
+from django.utils.formats import localize
 from django.contrib.auth import get_user_model
 from saleor.booking.models import Book as Table
 from saleor.booking.models import Payment
@@ -10,9 +11,12 @@ User = get_user_model()
 class BookingListSerializer(serializers.ModelSerializer):
     price_amount = serializers.SerializerMethodField()
     room_name = serializers.SerializerMethodField()
+    date_in = serializers.SerializerMethodField()
+    date_out = serializers.SerializerMethodField()
     customer_name = serializers.SerializerMethodField()
     booking_edit = serializers.HyperlinkedIdentityField(view_name='dashboard:booking-edit')
     booking_delete = serializers.HyperlinkedIdentityField(view_name='dashboard:booking-delete')
+    booking_detail = serializers.HyperlinkedIdentityField(view_name='dashboard:booking-detail')
 
     class Meta:
         model = Table
@@ -23,8 +27,8 @@ class BookingListSerializer(serializers.ModelSerializer):
                   'days',
                   'child',
                   'adult',
-                  'check_in',
-                  'check_out',
+                  'date_in',
+                  'date_out',
                   'active',
                   'customer_name',
                   'room_name',
@@ -32,7 +36,8 @@ class BookingListSerializer(serializers.ModelSerializer):
                   'price_amount',
                   'created',
                   'booking_edit',
-                  'booking_delete'
+                  'booking_delete',
+                  'booking_detail'
                  )
 
     def get_price_amount(self, obj):
@@ -43,6 +48,12 @@ class BookingListSerializer(serializers.ModelSerializer):
 
     def get_customer_name(self, obj):
         return obj.customer.name
+
+    def get_date_in(self, obj):
+        return localize(obj.check_in)
+
+    def get_date_out(self, obj):
+        return localize(obj.check_out)
 
 
 class PaymentListSerializer(serializers.ModelSerializer):

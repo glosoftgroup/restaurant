@@ -11,7 +11,6 @@ from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import pgettext_lazy
 from django_countries.fields import Country, CountryField
-from ..search import index
 
 
 class AddressBookManager(models.Manager):
@@ -115,7 +114,6 @@ class CustomerManager(BaseUserManager):
     def gain_points(self, customer, points):
         customer.loyalty_points = F('loyalty_points') + points        
         customer.save(update_fields=['loyalty_points'])
-
     
 
 class Customer(models.Model):

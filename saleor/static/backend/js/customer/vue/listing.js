@@ -40,7 +40,7 @@ var parent = new Vue({
                 date = '';
             }else{ date = this.date; }
             console.log(this.date);
-            this.$http.get($('.pageUrls').data('bookinglisturl')+'?page_size='+self.page_size+'&q='+this.search+'&status='+this.status+'&date='+date)
+            this.$http.get($('.pageUrls').data('listurl')+'?page_size='+self.page_size+'&q='+this.search+'&status='+this.status+'&date='+date)
                 .then(function(data){
                     data = JSON.parse(data.bodyText);
                     this.items = data.results;
@@ -53,7 +53,7 @@ var parent = new Vue({
             if(this.date == 'Select date'){
                 date = '';
             }else{ date = this.date; }
-            this.$http.get($('.pageUrls').data('bookinglisturl')+'?page='+num+'&page_size='+this.page_size+'&status='+this.status+'&date='+date)
+            this.$http.get($('.pageUrls').data('listurl')+'?page='+num+'&page_size='+this.page_size+'&status='+this.status+'&date='+date)
                 .then(function(data){
                     data = JSON.parse(data.bodyText);
                     this.items = data.results;
@@ -64,7 +64,7 @@ var parent = new Vue({
         },
         exportItems:function(){
             if(this.exportType == 'excel'){
-                JSONToCSVConvertor(this.items, "Booking Report", true);
+                JSONToCSVConvertor(this.items, "Customer Report", true);
             }
             if(this.exportType == 'pdf'){
                 $("#printme").printThis({
@@ -82,8 +82,11 @@ var parent = new Vue({
             }
 
         },
-        pagination: function(val){
+        pagination:function(val){
             var self=this ;
+            /* destroy pagination on page size change */
+            $('.bootpag-callback').twbsPagination('destroy');
+
             /* restructure pagination */
             $('.bootpag-callback').twbsPagination({
                 totalPages: parseInt(val),
@@ -99,7 +102,7 @@ var parent = new Vue({
         }
     },
     mounted:function(){
-        this.$http.get($('.pageUrls').data('bookinglisturl'))
+        this.$http.get($('.pageUrls').data('listurl'))
             .then(function(data){
                 data = JSON.parse(data.bodyText);
                 this.items = data.results;

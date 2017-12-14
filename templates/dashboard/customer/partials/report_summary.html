@@ -1,93 +1,164 @@
+
+<!--booking list-->
+<div class="row animated " id="vue-app">
+   <div class="col-md-12">
+      <div class="panel panel-flat">
+        <div class="panel-body  search-panel">
+
+            <div class="col-md-4">
+             <label>Search {{ table_name }}</label>
+              <div class="form-group form-group-material has-feedback">
+                <input class="form-control" v-model="search" @keyup="inputChangeEvent" placeholder="Search ..." type="text">
+                <div class="form-control-feedback">
+                  <i class="icon-search4 text-size-base"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="form-group">
+                 <label>Status</label>
+                 <select v-model="status" @change="inputChangeEvent" class="bootstrap-select" style="display: none;" data-width="100%" tabindex="-98">
+                    <option value="all" selected>All</option>
+                    <option value="True">Booked</option>
+                    <option value="False">Not Booked</option>
+                  </select>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <label>pick a date</label>
+              <div class="form-group">
+                <div class="input-group">
+                    <span v-datepicker></span>
+                  <input v-model="date" id="date" @change="inputChangeEvent" @blur="inputChangeEvent" class="form-control daterange-single" type="text" placeholder="yyyy-mm-dd">
+                  <span class="input-group-addon"><i class="icon-calendar22"></i></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-2">
+             <label>Export</label>
+              <div class="form-group">
+                 <select v-model="exportType" @change="exportItems" class="bootstrap-select" style="display: none;" data-width="100%" tabindex="-98">
+                    <option value="none" >Option</option>
+                    <option value="pdf" >export pdf</option>
+                    <option value="excel" >export excel</option>
+                  </select>
+              </div>
+            </div>
+
+      </div>
+   </div>
+
 <div class="row">
-<div class="col-md-6">
-<style type="text/css">
-	.fixh {
-		height: 153px;
-	}
-</style>
-	<!-- Available hours -->
-	<div class="panel text-center fixh">
-		<div class="panel-body">
-			
 
-        	<!-- Progress counter -->
-			<div class="content-group-sm svg-center position-relative" id="hours-available-progress">
-				<h2 class="mt-15 mb-5">{{customer.get_total_sales_amount}} </h2>
-				<i class="icon-cart text-pink-400 counter-icon" style="top: -28px"></i><div>{{customer.get_sales}} Sales</div><div class="text-size-small text-muted">{% if customer.customers.first.created %}
-				Last sale {{customer.customers.first.created|timesince}} ago
-			   {% endif %}</div></div>
-			<!-- /progress counter -->			
+  <div class="col-md-12">
+   <div id="pagination-div">
+      <!-- Header and footer fixed -->
+      <div class="panel panel-flat" id="printme">
+        <div class="panel-body">
+            <div class="col-md-12">
+                <h5 class="text-center text-bold">Room Booking List</h5>
+            </div>
+        <div class="">
+          <table class="table room-striped room-hover dataroom-header-footer" style="border-bottom:1px solid #ddd;">
+                <thead>
+                  <tr class="bg-primary">
+                    <th>Invoice</th>
+                    <th>Room</th>
+                    <th>Days</th>
+                    <th>Check-in</th>
+                    <th>Check-out</th>
+                    <th>Cost</th>
 
-		<a class="heading-elements-toggle"><i class="icon-more"></i></a></div>
-	</div>
-	<!-- /available hours -->
+                  </tr>
+                </thead>
+                <tbody id="tb">
+                <!--loader-->
+                <tr v-if="loader" class="text-center">
+                    <td colspan="8">
+                        <div class="pace-demo">
+                            <div class="theme_xbox"><div class="pace_progress" data-progress-text="60%" data-progress="60"></div><div class="pace_activity"></div></div>
+                        </div>
+                    </td>
+                </tr>
+                <!--no data template-->
+                <template  v-else>
+                <tr v-if="items.length == 0" class="text-center">
+                    <td colspan="8" class="text-bold animated zoomIn">
+                        No Data Found !
+                    </td>
+                </tr>
+                </template>
+                <!--listing template-->
+                <template v-for="item in items">
+                    <tr>
+                        <td class="td" :data-href="item.booking_detail">
+                            ${item.invoice_number}<br>
+                            <span v-show="item.active"><mark>active</mark></span>
+                        </td>
+                        <td class="td" :data-href="item.booking_detail">${item.room_name}</td>
+                        <td class="td" :data-href="item.booking_detail">${item.days}</td>
+                        <td class="td" :data-href="item.booking_detail">${item.date_in}</td>
+                        <td class="td" :data-href="item.booking_detail">${item.date_out}</td>
+                        <td class="td" :data-href="item.booking_detail">${item.price_amount}</td>
+
+
+                    </tr>
+                </template>
+
+
+                </tbody>
+           </table>
+
+        </div>
+        </div>
+
+         <style type="text/css">
+           .pagination{margin-bottom: 0px;}
+         </style>
+         <div class="row media-none">
+         <div class="col-md-12">
+          <div class="col-md-4">
+           <div class="col-md-12">
+            <div class="col-md-6 mt-10">
+             <label>display list size</label>
+            </div>
+            <div class="col-md-6 media-none">
+              <div class="form-group">
+                 <select v-model="page_size" @change="inputChangeEvent" class="bootstrap-select" style="display: none;" data-width="100%" tabindex="-98">
+                    <option value="10" selected>No:</option>
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                  </select>
+              </div>
+            </div>
+          </div>
+          </div>
+          <div class="col-md-4" id="media-none">
+              <div class="text-center bootpag-callback p2-pag" style="">
+            </div>
+           </div>
+            <div class="col-md-4">
+             <div class="col-md-12 mt-5">
+              <div class="pull-right pages-nav"></div>
+             </div>
+            </div>
+          </div>
+         </div>
+         <input type="hidden" id="page_size" val="">
+
+      </div>
+    </div><!-- pagination -->
+  </div>
 </div>
-<div class="col-md-6">
-
-	<!-- credit sale -->
-	<div class="panel text-center fixh">
-		<div class="panel-body">
-			
-
-        	<!-- Progress counter -->
-			<div class="content-group-sm svg-center position-relative" id="hours-available-progress">
-				<h2 class="mt-15 mb-5">{{customer.get_total_credit_amount}} </h2>
-				<i class="icon-cash3 text-pink-400 counter-icon" style="top: -28px"></i><div>{{customer.get_credits}} Credit</div><div class="text-size-small text-muted">
-				{% if customer.credit_customers.first.created %}
-					Last credit			
-				{{customer.credit_customers.first.created|timesince}} ago
-			  {% endif %}</div></div>
-			<!-- /progress counter -->			
-
-		<a class="heading-elements-toggle"><i class="icon-more"></i></a></div>
-	</div>
-	<!-- /available hours -->
 </div>
 
-<div class="col-md-6">
-	<!-- Productivity goal -->
-	<div class="panel text-center fixh">
-		<div class="panel-body">			
-			<!-- loyalty points -->
-			<div class="content-group-sm svg-center position-relative" id="goal-progress"><h2 class="mt-15 mb-5">{{customer.get_loyalty_points}}</h2><i class="icon-trophy3 text-indigo-400 counter-icon" style="top: -28px"></i><div>Loyalty points</div><div class="text-size-small text-muted">{{customer.get_loy_perc}}% average</div></div>
-			<!-- /progress counter -->
 
-			
+ </div>
+ </div>
 
-		<a class="heading-elements-toggle"><i class="icon-more"></i></a></div>
-	</div>
-	<!-- /productivity goal -->
 
-</div>
-<div class="col-md-6">
-	<!-- Productivity goal -->
-	<div class="panel text-center fixh">
-		<div class="panel-body">			
-			<!-- loyalty points -->
-			<div class="content-group-sm svg-center position-relative" id="goal-progress"><h2 class="mt-15 mb-5">{{customer.get_redeemed_loyalty_points}}</h2><i class="icon-drawer-in text-indigo-400 counter-icon" style="top: -28px"></i><div>Redeemed points</div><div class="text-size-small text-muted">{{customer.get_rem_perc}}% average</div></div>
-			<!-- /progress counter -->
-
-			
-
-		<a class="heading-elements-toggle"><i class="icon-more"></i></a></div>
-	</div>
-	<!-- /productivity goal -->
-
-</div>
-<div class="col-md-6">
-	<!-- Productivity goal -->
-	<div class="panel text-center fixh">
-		<div class="panel-body">			
-			<!-- discount -->
-			<div class="content-group-sm svg-center position-relative" id="goal-progress"><h2 class="mt-15 mb-5">{{customer.get_total_discount }}</h2><i class="icon-gift text-indigo-400 counter-icon" style="top: -28px"></i><div>Total Discount</div><div class="text-size-small text-muted"></div></div>
-			<!-- /progress counter -->
-
-			
-
-		<a class="heading-elements-toggle"><i class="icon-more"></i></a></div>
-	</div>
-	<!-- /productivity goal -->
-
-</div>
-
-</div>
+<input type="hidden" class="pageUrls"
+  data-bookinglisturl="{% url 'booking-api:api-customer-booking-list' pk=user.pk %}"
+>
+<!--end listing-->

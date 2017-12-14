@@ -132,13 +132,21 @@
                 </thead>
                 <tbody id="tb">
                 <!--loader-->
-                <tr v-show="loader" class="text-center">
+                <tr v-if="loader" class="text-center">
                     <td colspan="8">
                         <div class="pace-demo">
                             <div class="theme_xbox"><div class="pace_progress" data-progress-text="60%" data-progress="60"></div><div class="pace_activity"></div></div>
                         </div>
                     </td>
                 </tr>
+                <!--no data template-->
+                <template  v-else>
+                <tr v-if="items.length == 0" class="text-center">
+                    <td colspan="8" class="text-bold animated zoomIn">
+                        No Data Found !
+                    </td>
+                </tr>
+                </template>
                 <!--listing template-->
                 <template v-for="item in items">
                     <tr>
@@ -148,8 +156,8 @@
                         </td>
                         <td>${item.room_name}</td>
                         <td>${item.days}</td>
-                        <td>${item.check_in}</td>
-                        <td>${item.check_out}</td>
+                        <td>${item.date_in}</td>
+                        <td>${item.date_out}</td>
                         <td>${item.customer_name}</td>
                         <td>${item.price_amount}</td>
 
@@ -165,8 +173,16 @@
                             action <span class="roomet"></span>
                             </button>
                             <ul class="dropdown-menu edit-dropdown" >
-                                  <li class="td"><a :href="item.booking_edit"><i class="icon-pencil7"></i> EDIT</a>
-                                  </li>
+                                <li class="td">
+                                    <a :href="item.booking_detail">
+                                    <i class="icon-eye2"></i>
+                                    Detail</a>
+                                </li>
+                                <li class="td">
+                                    <a :href="item.booking_edit">
+                                    <i class="icon-pencil7"></i>
+                                    EDIT</a>
+                                </li>
                                 <li>
                                     <a data-ta="#modal_instance" @click="deleteBooking(item.booking_delete,item.id)" data-title="" :data-href="item.booking_edit" data-id="${item.id}"
                                      class="modal-trigger del-btn"><i class="icon-trash" href="#modal_instance" data-toggle="modal"></i> DELETE

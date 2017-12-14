@@ -75,41 +75,32 @@
     </form>
     <div class="panel panel-white">
         <div class="panel-heading">
-            <h6 class="panel-title text-bold">Invoice | {{instance.room.name}}</h6>
+            <h6 class="panel-title text-bold">Room: | {{instance.room.name}} &nbsp; &nbsp; &nbsp;  Floor: {{instance.room.floor}}</h6>
             <div class="heading-elements">
-                <button v-if="is_active" type="button" @click="checkOut" class="btn btn-success btn-xs heading-btn legitRipple" id="checkoutBtn"> Check-out</button>
-
                 <button type="button" class="btn btn-default btn-xs heading-btn legitRipple" id="printBtn"><i class="icon-printer position-left"></i> Print</button>
             </div>
         <a class="heading-elements-toggle"><i class="icon-more"></i></a></div>
 
         <div class="panel-body no-padding-bottom" >
             <div class="row">
-                <div class="col-sm-6 content-group">
-                    {% if business_logo %}
-                    <img src="{{business_logo}}" style="max-height:100px;width:auto;"/>
-                    {% endif %}
 
-                    <ul class="list-condensed list-unstyled">
-                        <li>{% business_name %}</li>
 
-                    </ul>
-                </div>
-
-                <div class="col-sm-6 content-group">
-                    <div class="invoice-details">
-                        <h5 class="text-uppercase text-semibold">Invoice #{{instance.invoice_number}}</h5>
-                        <ul class="list-condensed list-unstyled">
+                <div class="col-sm-4 content-groupg col-md-offset-3">
+                    <div class="invoice-details text-center">
+                        <h5 class="text-uppercase text-center text-semibold">Invoice #{{instance.invoice_number}}</h5>
+                        <ul class="list-condensed text-center list-unstyled">
+                            <li>DAYS: <span class="text-semibold">{{instance.days}}</span></li>
                             <li>CHECK-IN: <span class="text-semibold">{{instance.check_in}}</span></li>
                             <li>CHECK-OUT: <span class="text-semibold">{{instance.check_out}}</span></li>
                         </ul>
                     </div>
                 </div>
             </div>
+            <hr>
 
             <div class="row">
                 <div class="col-md-6 col-lg-9 content-group">
-                    <span class="text-muted">Invoice To:</span>
+                    <span class="text-muted">Customer:</span>
                     <ul class="list-condensed list-unstyled">
                         <li><h5>{{instance.customer.name}}</h5></li>
                         <li>{{instance.customer.mobile}}</li>
@@ -124,9 +115,9 @@
                 </div>
 
                 <div class="col-md-6 col-lg-3 content-group">
-                    <span class="text-muted">Payment Details:</span>
+                    <span class="text-muted text-right">Payment Details:</span>
                     <ul class="list-condensed list-unstyled invoice-payment-details">
-                        <li><h5>Total Due: <span class="text-right text-semibold">${balance} {{instance.balance.currency}}</span></h5></li>
+                        <li><h5 class="">Total Due: <span class="text-right text-semibold">${balance} {{instance.balance.currency}}</span></h5></li>
 
                     </ul>
                 </div>

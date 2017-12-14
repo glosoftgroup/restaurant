@@ -3,12 +3,10 @@
 {% load i18n %}
 {% load prices_i18n %}
 
-{% block title %}
-  {{ table_name }} - {{ block.super }}
-{% endblock %}
+{{ table_name }} - {{ block.super }}
 
  {% block breadcrumbs %}
-      <li class="active"><a href="{% url 'dashboard:customers' %}">Customer</a></li>
+     <li class="active"><a href="{% url 'dashboard:customers' %}">Customer</a></li>
  {% endblock %}
 
 
@@ -53,9 +51,10 @@
             <div class="col-md-2">
               <label style="visibility: hidden;"> Book</label>
               <div class="form-group">
-                {% if perms.customer.add_customer %}
-                    <a href="{% url 'dashboard:customer-add' %}" class="btn btn-primary  hvr-glow btn-raised legitRipple ">
-                    <i class="icon-plus3 position-left"></i>Add Customer</a>
+                {% if perms.sale.add_paymentoption %}
+                  <a href="{% url 'dashboard:booking-add' %}" id="addExpenseBtn" class="btn-block btn-primary btn-lg">
+                      <i class="icon-plus2"></i> Book
+                  </a>
                 {% endif %}
               </div>
             </div>
@@ -68,7 +67,16 @@
                 </div>
               </div>
             </div>
-
+            <div class="col-md-2">
+              <div class="form-group">
+                 <label>Status</label>
+                 <select v-model="status" @change="inputChangeEvent" class="bootstrap-select" style="display: none;" data-width="100%" tabindex="-98">
+                    <option value="all" selected>All</option>
+                    <option value="True">Booked</option>
+                    <option value="False">Not Booked</option>
+                  </select>
+              </div>
+            </div>
             <div class="col-md-2">
               <label>pick a date</label>
               <div class="form-group">
@@ -101,15 +109,19 @@
       <div class="panel panel-flat" id="printme">
         <div class="panel-body">
             <div class="col-md-12">
-                <h5 class="text-center text-bold">{{table_name}} List</h5>
+                <h5 class="text-center text-bold">Room Booking List</h5>
             </div>
         <div class="">
           <table class="table room-striped room-hover dataroom-header-footer" style="border-bottom:1px solid #ddd;">
                 <thead>
                   <tr class="bg-primary">
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Mobile</th>
+                    <th>Invoice</th>
+                    <th>Room</th>
+                    <th>Days</th>
+                    <th>Check-in</th>
+                    <th>Check-out</th>
+                    <th>Customer</th>
+                    <th>Cost</th>
 
                     {% if perms.room.delete_room %}
                     <th class="text-center">Options</th>
@@ -118,29 +130,26 @@
                 </thead>
                 <tbody id="tb">
                 <!--loader-->
-                <tr v-if="loader" class="text-center">
+                <tr v-show="loader" class="text-center">
                     <td colspan="8">
                         <div class="pace-demo">
                             <div class="theme_xbox"><div class="pace_progress" data-progress-text="60%" data-progress="60"></div><div class="pace_activity"></div></div>
                         </div>
                     </td>
                 </tr>
-                <!--no data template-->
-                <template  v-else>
-                <tr v-if="items.length == 0" class="text-center">
-                    <td colspan="8" class="text-bold animated zoomIn">
-                        No Data Found !
-                    </td>
-                </tr>
-                </template>
                 <!--listing template-->
                 <template v-for="item in items">
                     <tr>
                         <td>
-                            ${item.name}<br>
+                            ${item.invoice_number}<br>
+                            <span v-show="item.active"><mark>active</mark></span>
                         </td>
-                        <td>${item.email}</td>
-                        <td>${item.mobile}</td>
+                        <td>${item.room_name}</td>
+                        <td>${item.days}</td>
+                        <td>${item.check_in}</td>
+                        <td>${item.check_out}</td>
+                        <td>${item.customer_name}</td>
+                        <td>${item.price_amount}</td>
 
                         <!-- actions -->
                         <style>
@@ -151,21 +160,21 @@
                         <td class="text-center">
                             <div class="btn-group">
                             <button  type="button" class="btn btn-default dropdown-toggle legitRipple" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            action
+                            action <span class="roomet"></span>
                             </button>
                             <ul class="dropdown-menu edit-dropdown" >
                                 <li class="td">
-                                    <a :href="item.detail_url">
+                                    <a :href="item.booking_detail">
                                     <i class="icon-eye2"></i>
-                                    DETAIL</a>
+                                    Detail</a>
                                 </li>
                                 <li class="td">
-                                    <a :href="item.edit_url">
+                                    <a :href="item.booking_edit">
                                     <i class="icon-pencil7"></i>
                                     EDIT</a>
                                 </li>
                                 <li>
-                                    <a data-ta="#modal_instance" @click="deleteBooking(item.delete_url,item.id)" data-title="" :data-href="item.booking_edit" data-id="${item.id}"
+                                    <a data-ta="#modal_instance" @click="deleteBooking(item.booking_delete,item.id)" data-title="" :data-href="item.booking_edit" data-id="${item.id}"
                                      class="modal-trigger del-btn"><i class="icon-trash" href="#modal_instance" data-toggle="modal"></i> DELETE
                                     </a>
                                 </li>
@@ -177,7 +186,12 @@
                     </tr>
                 </template>
 
-
+                <!--no data template-->
+                <tr v-if="items.length == 0 && !loader" class="text-center">
+                    <td colspan="8" class="text-bold animated zoomIn">
+                        No Data Found !
+                    </td>
+                </tr>
                 </tbody>
            </table>
 
@@ -333,7 +347,7 @@
 
 
        <div class="modal-footer">
-         <button type="submit" id='modal_delete' class="btn pull-right bg-danger del" data-id="" data-href="">Delete</button>
+         <button type="submit" id='modal_delete' class="btn pull-right bg-danger del" onclick="return false" data-id="" data-href="">Delete</button>
          <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
        </div>
       </form>
@@ -341,7 +355,7 @@
    </div>
  </div>
 <input type="hidden" class="pageUrls"
-  data-listurl="{% url 'customer-api:list' %}"
+  data-bookinglisturl="{% url 'booking-api:api-booking-list' %}"
 >
 {% endblock%}
 {% block custom_js %}
@@ -352,11 +366,15 @@
 <script type="text/javascript" src="{% static 'backend/js/plugins/loaders/progressbar.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/plugins/vue/vue.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/plugins/vue/vue-resource.js' %}"></script>
-<script type="text/javascript" src="{% static 'backend/js/customer/vue/listing.js' %}"></script>
+<script type="text/javascript" src="{% static 'backend/js/booking/vue/listing.js' %}"></script>
 <script type="text/javascript">
-$(document).ready(function() {
-   $('.bootstrap-select').selectpicker();
-});
+  var paginationSearchUrl = "{% url 'dashboard:booking-search' %}";
+  var paginationUrl = "{% url 'dashboard:booking_paginate' %}";
+  $(document).ready(function() {
+  $('.bootstrap-select').selectpicker();
+
+
+  });
 
 </script>
 {% endblock %}
