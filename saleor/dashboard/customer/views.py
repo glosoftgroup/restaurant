@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator, PageNotAnInteger, InvalidPage, EmptyPage
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Min, Sum, Avg, F, Q
+
 from ..views import staff_member_required
 from ...customer.models import Customer
 from ...sale.models import (Sales, SoldItem)
@@ -22,6 +23,7 @@ table_name = 'Customers'
 @permission_decorator('customer.view_customer')
 def users(request):
     global table_name
+
     ctx = {'table_name': table_name}
     return TemplateResponse(request, 'dashboard/customer/users.html', ctx)
 
@@ -36,6 +38,7 @@ def user_add(request):
     except TypeError as e:
         error_logger.error(e)
         return HttpResponse('error accessing add users page')
+
 
 @staff_member_required
 def user_process(request):	

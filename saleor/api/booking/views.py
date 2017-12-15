@@ -22,9 +22,12 @@ class BookingListAPIView(generics.ListAPIView):
     queryset = Table.objects.all()
 
     def get_queryset(self, *args, **kwargs):
-        if self.kwargs['pk']:
-            queryset_list = Table.objects.filter(customer__pk=self.kwargs['pk']).select_related()
-        else:
+        try:
+            if self.kwargs['pk']:
+                queryset_list = Table.objects.filter(customer__pk=self.kwargs['pk']).select_related()
+            else:
+                queryset_list = Table.objects.all().select_related()
+        except Exception as e:
             queryset_list = Table.objects.all().select_related()
         query = self.request.GET.get('q')
         page_size = 'page_size'

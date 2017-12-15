@@ -4,7 +4,6 @@ var $modal = $('#modal_instance');
 var date;
 
 //vue
-
 var parent = new Vue({
     el:"#vue-app",
     delimiters: ['${', '}'],
@@ -22,7 +21,7 @@ var parent = new Vue({
     },
     methods:{
         deleteBooking: function(url,id){
-            /* open modal */
+            /* open delete modal and populate dynamic form attributes */
             $modal.modal();
 
             /* set dynamic form data */
@@ -35,6 +34,7 @@ var parent = new Vue({
             $('.delete_form').attr('action',url);
         },
         inputChangeEvent:function(){
+            /* make api request on events filter */
             var self = this;
             if(this.date == 'Select date'){
                 date = '';
@@ -50,6 +50,7 @@ var parent = new Vue({
             });
         },
         listItems:function(num){
+        /* make api request when pagination pages are clicked */
             if(this.date == 'Select date'){
                 date = '';
             }else{ date = this.date; }
@@ -63,6 +64,7 @@ var parent = new Vue({
             });
         },
         exportItems:function(){
+        /* take care  of excel and pdf exports on filter panel */
             if(this.exportType == 'excel'){
                 JSONToCSVConvertor(this.items, "Booking Report", true);
             }
@@ -83,6 +85,7 @@ var parent = new Vue({
 
         },
         pagination: function(val){
+        /* include twbsPagination on vue app */
             var self=this ;
             /* restructure pagination */
             $('.bootpag-callback').twbsPagination({
@@ -99,6 +102,7 @@ var parent = new Vue({
         }
     },
     mounted:function(){
+    /* on page load populate items with api list response */
         this.$http.get($('.pageUrls').data('bookinglisturl'))
             .then(function(data){
                 data = JSON.parse(data.bodyText);
@@ -112,6 +116,7 @@ var parent = new Vue({
 
     },
     watch: {
+    /* listen to app data changes and restructure pagination when page size changes */
         'date': function(val, oldVal){
             this.inputChangeEvent();
         },

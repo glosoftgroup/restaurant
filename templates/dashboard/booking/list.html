@@ -196,12 +196,7 @@
                     </tr>
                 </template>
 
-                <!--no data template-->
-                <tr v-if="items.length == 0 && !loader" class="text-center">
-                    <td colspan="8" class="text-bold animated zoomIn">
-                        No Data Found !
-                    </td>
-                </tr>
+
                 </tbody>
            </table>
 
@@ -367,6 +362,12 @@
 <input type="hidden" class="pageUrls"
   data-bookinglisturl="{% url 'booking-api:api-booking-list' %}"
 >
+</div>
+<!--charts     -->
+<div id="chart-app">
+
+</div>
+
 {% endblock%}
 {% block custom_js %}
   <script type="text/javascript" src="{% static 'backend/js/plugins/forms/selects/bootstrap_multiselect.js' %}"></script>
@@ -378,8 +379,6 @@
 <script type="text/javascript" src="{% static 'backend/js/plugins/vue/vue-resource.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/booking/vue/listing.js' %}"></script>
 <script type="text/javascript">
-  var paginationSearchUrl = "{% url 'dashboard:booking-search' %}";
-  var paginationUrl = "{% url 'dashboard:booking_paginate' %}";
   $(document).ready(function() {
   $('.bootstrap-select').selectpicker();
 

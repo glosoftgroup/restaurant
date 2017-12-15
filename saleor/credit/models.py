@@ -1,26 +1,16 @@
 from __future__ import unicode_literals
 
 from decimal import Decimal
-from uuid import uuid4
 
-import emailit.api
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
-from django.core.urlresolvers import reverse
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.timezone import now
 from django.utils.translation import pgettext_lazy
 from django_prices.models import PriceField
 
 from django.utils import timezone
-from payments import PaymentStatus, PurchasedItem
-from payments.models import BasePayment
-from prices import Price, FixedDiscount
-from django.db.models import F
-from satchless.item import ItemLine, ItemSet
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 from ..discount.models import Voucher
 from ..product.models import Product
@@ -110,6 +100,7 @@ class Credit(models.Model):
         null=False)
     
     objects = CreditManager()
+
     class Meta:
         ordering = ('-last_status_change',)
         verbose_name = pgettext_lazy('Credit model', 'Credit')
