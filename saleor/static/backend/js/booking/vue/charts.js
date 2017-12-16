@@ -10,13 +10,13 @@ var chart = new Vue({
        loader:true
     },
     methods:{
-        yearlyChart:function(data){
-            Highcharts.chart('container', {
+        yearlyVisitsChart:function(data){
+            Highcharts.chart('yearly-visits-chart', {
                 chart: {
                     type: 'line'
                 },
                 title: {
-                    text: 'Monthly report'
+                    text: 'Number of Visitors Monthly report'
                 },
 
                 xAxis: {
@@ -40,44 +40,126 @@ var chart = new Vue({
                         name: 'Room Booking',
                         data: data
                     },
+                ]
+            });
 
+            $('.yearly-visits-chart').css('display', 'none');
 
+        },
+        yearlyAmountChart:function(data){
+            Highcharts.chart('yearly-amount-chart', {
+                chart: {
+                    type: 'line'
+                },
+                title: {
+                    text: 'Amount Earned Monthly report'
+                },
+
+                xAxis: {
+                    categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                },
+                yAxis: {
+                    title: {
+                        text: 'Total Amount(s)'
+                    }
+                },
+                plotOptions: {
+                    line: {
+                        dataLabels: {
+                            enabled: true
+                        },
+                        enableMouseTracking: false
+                    }
+                },
+                series: [
+                    {
+                        name: 'Room Booking',
+                        data: data
+                    },
                 ]
             });
 
             $('.container').css('display', 'none');
 
         },
-        lastTenChart: function(data){
-            $('#last-ten').highcharts({
+        lastVisitsChart: function(data){
+            $('#last-visits-chart').highcharts({
                 title: {
-                  text: 'Everything seems fine',
+                  text: 'Last Room Booking Report',
                 },
                 xAxis: {
                   type: 'datetime'
                 },
+                yAxis: {
+                    title: {
+                        text: 'Total Visits(s)'
+                    }
+                },
                 series: [{
-                  name: 'A fine series',
-                  data: data
-                }]
-              });
+                  name: 'Visits',
+                  data:  data
+                  }]
+            });
+        },
+        lastAmountChart: function(data){
+            $('#last-amount-chart').highcharts({
+                title: {
+                  text: 'Latest Booking Report',
+                },
+                subtitle: {
+                    text: 'Total Amount Generated on Last Visits Report'
+                },
+                xAxis: {
+                  type: 'datetime'
+                },
+                yAxis: {
+                    title: {
+                        text: 'Total Amount(s)'
+                    }
+                },
+                series: [{
+                  name: 'Total',
+                  data:  data
+                  }]
+            });
         }
     },
     mounted:function(){
     /* initailize chart */
         this.$http.get($('.pageUrls').data('listurl'))
             .then(function(data){
+                /* decode json response */
                 data = JSON.parse(data.bodyText);
-                this.items = data.results.yearly;
-                this.yearlyChart(this.items);
-                var obj = data.results.last_booking;
+
+                /* 1.1 get yearly visits */
+                this.items = data.results.yearly_visits;
+                /* render chart */
+                this.yearlyVisitsChart(this.items);
+
+                /* 1.2 get yearly visits */
+                this.items = data.results.yearly_amount;
+                /* render chart */
+                this.yearlyAmountChart(this.items);
+
+                /* 2. get last visits */
+                var obj = data.results.last_visits;
                 var temp = [];
                  Object.keys(obj).forEach(function(key) {
-                    //console.log(key, obj[key]);
-                    temp.push(moment( obj['date']).valueOf(),key);
+                    var temp2 = [moment.utc(obj[key].date).valueOf(),parseInt(obj[key].total)];
+                    temp.push(temp2);
                 });
-                console.log(temp);
-                this.lastTenChart(temp);
+                /* render chart */
+                this.lastVisitsChart(temp);
+
+                /* 3. get last booking total prices */
+                var obj = data.results.last_amount;
+                var temp = [];
+                 Object.keys(obj).forEach(function(key) {
+                    var temp2 = [moment.utc(obj[key].date).valueOf(),parseInt(obj[key].total)];
+                    temp.push(temp2);
+                });
+                /* render chart */
+                this.lastAmountChart(temp);
 
                 this.loader = false;
             }, function(error){

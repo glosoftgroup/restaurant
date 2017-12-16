@@ -198,15 +198,31 @@ def charts(request):
     global table_name
     data = {"table_name": table_name}
     if request.is_ajax():
-        last_five_booking = Table.objects.all()[:10]
-        last_booking = []
-        for obj in last_five_booking:
-            last_booking.append({'date':  DateFormat(obj.created).format('Y-m-d'), 'total': Table.objects.total_bookings(obj.created)})
-        yearly = Table.objects.yearly_data()
-        monthly = Table.objects.monthly_data()
+        # get last 30 room bookings
+        last_thirty_booking = Table.objects.all().order_by('id')[:30]
+        last_visits_booking = []
+        for obj in last_thirty_booking:
+            last_visits_booking.append(
+                {'date':  DateFormat(obj.created).format('Y-m-d'),
+                 'total': Table.objects.total_bookings(obj.created)})
+        last_amount_booking = []
+        for obj in last_thirty_booking:
+            last_amount_booking.append(
+                {'date': DateFormat(obj.created).format('Y-m-d'),
+                 'total': Table.objects.total_bookings(obj.created, 'amount')})
+
+        yearly_visits = Table.objects.yearly_visits_data()
+        yearly_amount = Table.objects.yearly_amount_data()
+        monthly = Table.objects.monthly_visits_data()
         return HttpResponse(
                      json.dumps(
-                         {"results": {'last_booking': last_booking, 'yearly': yearly, "monthly":  monthly}}), content_type='application/json')
+                         {"results":
+                              {'last_amount': last_amount_booking,
+                               'last_visits': last_visits_booking,
+                               'yearly_visits': yearly_visits,
+                               'yearly_amount': yearly_amount,
+                               "monthly":  monthly}
+                          }), content_type='application/json')
     return TemplateResponse(request, 'dashboard/'+table_name.lower()+'/charts.html', data)
 
 

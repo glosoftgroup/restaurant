@@ -15,7 +15,7 @@ from ..customer.models import Customer
 
 
 class ModelManager(models.Manager):
-    def monthly_data(self, year=None):
+    def monthly_visits_data(self, year=None):
         final_data = []
         last_instance = self.get_queryset().latest('id')
         if not year:
@@ -27,7 +27,11 @@ class ModelManager(models.Manager):
             final_data.append(count)
         return final_data
 
-    def yearly_data(self, year=None):
+    def yearly_visits_data(self, year=None):
+        """
+        :param year:
+        :return: Total visits each month
+        """
         final_data = []
         last_instance = self.get_queryset().latest('id')
         if not year:
@@ -38,12 +42,45 @@ class ModelManager(models.Manager):
             final_data.append([str(year)+str(1)+str(month), count])
         return final_data
 
-    def total_bookings(self, date):
+    def yearly_amount_data(self, year=None):
         """
-        :param date:
+        :param year:
+        :return: total amount received in each month
+        """
+        final_data = []
+        last_instance = self.get_queryset().latest('id')
+        if not year:
+            year = DateFormat(last_instance.created).format('Y')
+        for month in range(1, 13):
+            amount = self.get_queryset().filter(created__year=year)\
+                                       .filter(created__month=month) \
+                                       .aggregate(models.Sum('price'))['price__sum']
+            if not amount:
+                amount = 0
+            else:
+                amount = amount.gross
+            final_data.append([str(year)+str(1)+str(month), float(str(amount))])
+        return final_data
+
+    def total_bookings(self, date, amount=False):
+        """
+        :param date: filter by this date
+        :param amount: if set return total amount
         :return: return total booking in that date
         """
-        return self.get_queryset().filter(created=date).count()
+        if amount:
+            total = self.get_queryset() \
+                .filter(created__icontains=DateFormat(date)
+                        .format('Y-m-d')).aggregate(models.Sum('price'))['price__sum']
+            if total:
+                total = float(str(total.gross))
+            else:
+                total = 0
+            return total
+
+        return self.get_queryset()\
+                   .filter(created__icontains=DateFormat(date)
+                           .format('Y-m-d')).count()
 
 
 class Book(models.Model):

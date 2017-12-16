@@ -4,7 +4,7 @@
 {% load prices_i18n %}
 
 {% block title %}
-  {{ table_name }}
+  {{ table_name }} Report Charts
 {% endblock %}
 
  {% block breadcrumbs %}
@@ -46,21 +46,30 @@
  {% endblock %}
 
 {% block content %}
- <div class="row animated " id="vue-app">
-   <div class="col-md-12">
-
-     <!-- Header and footer fixed -->
-      <div class="panel panel-flat" id="printme">
-        <div class="panel-body">
-
-            <!--yearly-->
-            <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto">
-            </div>
-            <!--last ten-->
-            <div id="last-tenh" style="min-width: 310px; height: 400px; margin: 0 auto">
-            </div>
+ <div class="row animated fadeIn" id="vue-app">
+   <div class="col-md-6 animated zoomIn">
+        <!--yearly amount-->
+        <div id="yearly-amount-chart" style="min-width: 310px; height: 400px; margin: 0 auto">
         </div>
-      </div>
+   </div>
+   <div class="col-md-6">
+       <!--yearly visits-->
+       <div id="yearly-visits-chart" style="min-width: 310px; height: 400px; margin: 0 auto">
+        </div>
+   </div>
+   <div class="col-md-12">
+       <hr class="text-primary">
+   </div>
+   <div class="col-md-6">
+        <!--last mount-->
+        <div id="last-amount-chart" style="min-width: 310px; height: 400px; margin: 0 auto">
+        </div>
+   </div>
+   <div class="col-md-6">
+        <!--last visits-->
+       <div id="last-visits-chart" style="min-width: 310px; height: 400px; margin: 0 auto">
+        </div>
+   </div>
    </div>
  </div>
 <input type="hidden" class="pageUrls" data-listurl="{% url 'dashboard:booking-charts' %}">
