@@ -141,9 +141,10 @@ def delete(request, pk=None):
     if request.method == 'POST':
         try:
             option.delete()
-            user_trail(request.user.name, 'deleted room : '+ str(option.name), 'delete')
-            info_logger.info('deleted room: '+ str(option.name))
-            return HttpResponse('success')
+            data = {
+                "table_name": table_name,
+            }
+            return TemplateResponse(request, 'dashboard/' + table_name.lower() + '/list.html', data)
         except Exception, e:
             error_logger.error(e)
             return HttpResponse(e)
@@ -154,7 +155,7 @@ def detail(request, pk=None):
     global table_name
     if pk:
         payment_options = PaymentOption.objects.all()
-        instance = Table.objects.filter(room__pk=pk).first()
+        instance = Table.objects.filter(pk=pk).first()
         ctx = {'table_name': table_name, 'instance': instance, 'payment_options': payment_options}
         return TemplateResponse(request, 'dashboard/' + table_name.lower() + '/detail.html', ctx)
     return HttpResponse('Invalid Request. Booking id required')
@@ -188,8 +189,6 @@ def listing(request):
     data = {
             "table_name": table_name,
         }
-    user_trail(request.user.name, 'accessed '+table_name+' List', 'views')
-
     return TemplateResponse(request, 'dashboard/'+table_name.lower()+'/list.html', data)
 
 
