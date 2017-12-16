@@ -10,7 +10,6 @@ from saleor.room.models import Room
 from saleor.customer.models import Customer
 from saleor.sale.models import PaymentOption
 
-from ...decorators import user_trail
 import logging
 import json
 
@@ -84,8 +83,6 @@ def add(request):
         if request.POST.get('active'):
             b = lambda x: True if x > 0 else False
             instance.active = b(int(request.POST.get('active')))
-        else:
-            instance.active = True
         instance.user = request.user
         instance.save()
         if request.POST.get('room'):

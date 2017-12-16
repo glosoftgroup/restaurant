@@ -371,6 +371,11 @@
                          <i class="icon-archive"></i>Reservations
                         </a>
                     </li>
+                    <li class="{% block menu_bookingcharts_class %}{% endblock %}">
+                        <a href="{% url 'dashboard:booking-charts'%}">
+                         <i class="icon-graph"></i>Report Charts
+                        </a>
+                    </li>
                   </ul></li>
 
                    {% if perms.sale.view_terminal or perms.sale.view_paymentoption or perms.sale.view_drawercash %}

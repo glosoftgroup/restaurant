@@ -41,7 +41,7 @@ class BookingListSerializer(serializers.ModelSerializer):
                  )
 
     def get_price_amount(self, obj):
-        return obj.price.gross
+        return "{:,}".format(obj.price.gross)
 
     def get_room_name(self, obj):
         return obj.room.name

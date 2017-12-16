@@ -8,11 +8,12 @@
 {% endblock %}
 
  {% block breadcrumbs %}
-     <li class="active"><a href="{% url 'dashboard:booking-list' %}">{{ table_name }} </a></li>
+     <li class=""><a href="{% url 'dashboard:booking-list' %}">{{ table_name }} </a></li>
+     <li>Report Charts</li>
  {% endblock %}
 
 
-{% block menu_booking_class %}active{% endblock %}
+{% block menu_bookingcharts_class %}active{% endblock %}
  {% block custom_css %}
    <style type="text/css">
       .theme_xbox .pace_activity, .theme_xbox .pace_activity::after, .theme_xbox .pace_activity::before, .theme_xbox_sm .pace_activity, .theme_xbox_sm .pace_activity::after, .theme_xbox_sm .pace_activity::before, .theme_xbox_xs .pace_activity, .theme_xbox_xs .pace_activity::after, .theme_xbox_xs .pace_activity::before {
@@ -80,7 +81,7 @@
 <script type="text/javascript" src="{% static 'backend/js/plugins/forms/selects/bootstrap_select.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/plugins/pagination/jquery.twbsPagination.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/plugins/loaders/progressbar.min.js' %}"></script>
-<script src="https://code.highcharts.com/highcharts.js"></script>
+<script type="text/javascript" src="{% static 'backend/js/plugins/ui/Highcharts-5.0.14/code/highcharts.js' %}"></script>
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
 <script type="text/javascript" src="{% static 'backend/js/plugins/vue/vue.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/plugins/vue/vue-resource.js' %}"></script>
