@@ -9,7 +9,7 @@
 {% endblock %}
 {% block header_extra %}
 {% endblock %}
-{% block breadcrumbs %} 
+{% block breadcrumbs %}
    <li>
       <a href="{% url 'dashboard:supplier' %}">
       Supplier
@@ -203,7 +203,7 @@ function disable_profile_tab(){
                return $(this).val();
             }).get();
       var groups = raw_groups.map(Number);
-      console.log(groups);
+
 
       if(file != ''){
           var f = document.getElementById('user-details');
@@ -214,7 +214,7 @@ function disable_profile_tab(){
           }
 
           for (var pair of formData.entries()) {
-              console.log(pair[0]+ ', ' + pair[1]);
+
           }
           if (formData) {
                 $.ajax({
@@ -281,6 +281,6 @@ function disable_profile_tab(){
             theme: 'bg-danger'
         });
   });
-  
+
 </script>
 {% endblock %}
