@@ -3,6 +3,7 @@ from django.template.response import TemplateResponse
 from django.http import HttpResponse
 from django.core.paginator import Paginator, PageNotAnInteger, InvalidPage, EmptyPage
 from django.db.models import Q
+from django.core.urlresolvers import reverse
 from django.utils.translation import pgettext_lazy
 from django.contrib import messages
 from django.utils.http import is_safe_url
@@ -67,9 +68,12 @@ def add(request):
             pricing.monthly = request.POST.get('monthly')
         pricing.save()
 
+        edit_url = reverse(
+            'dashboard:room-edit', kwargs={'pk': instance.pk})
         data = {'name': instance.name,
                 'is_booked': instance.is_booked,
-                'pk': instance.pk}
+                'pk': instance.pk,
+                'edit_url': edit_url}
         return HttpResponse(json.dumps(data), content_type='application/json')
     else:
         packages = Package.objects.all()
@@ -78,6 +82,38 @@ def add(request):
             package_json.append({'name': str(package.name)})
         ctx = {'table_name': table_name, 'packages': packages, 'package_json': package_json}
         return TemplateResponse(request, 'dashboard/room/form.html', ctx)
+
+
+@staff_member_required
+def add_image(request, pk=None):
+    if request.method == 'POST' and request.FILES['images[]'] and pk:
+        try:
+            instance = Table.objects.get(pk=pk)
+            image = RoomImage()
+            image.room = instance
+            image.image = request.FILES['images[]']
+            image.save()
+            return HttpResponse('Image uploaded')
+        except Exception as e:
+            return HttpResponse('Image upload failed')
+    else:
+        return HttpResponse('no image')
+
+
+@staff_member_required
+def delete_image(request, pk=None):
+    if request.method == 'POST' and pk:
+        #instance = RoomImage.objects.all().delete()
+        instance = RoomImage.objects.get(pk=pk)
+
+        # Deletes Image Renditions
+        instance.image.delete_all_created_images()
+        # Deletes Original Image
+        instance.image.delete()
+        instance.delete()
+        return HttpResponse('deleted successfully')
+    else:
+        return HttpResponse('Invalid method or PK')
 
 
 @staff_member_required

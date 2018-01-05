@@ -535,7 +535,7 @@ class RoomImage(models.Model):
         verbose_name_plural = pgettext_lazy('Room image model', 'room images')
 
     def get_ordering_queryset(self):
-        return self.product.images.all()
+        return self.room.room_images.all()
 
     def save(self, *args, **kwargs):
         if self.order is None:

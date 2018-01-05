@@ -2,8 +2,13 @@
                {% for option in options %}
 
                   <tr  id="{{option.pk }}">
+                      <!-- image -->
+                    <td>
+                        {% if option.room_images.first.image %}
+                        <img src="{{ option.room_images.first.image.crop.40x40 }}">
+                        {% endif %}
+                    </td>
                     <!-- name -->
-
                     <td class="td" data-href="{% url 'dashboard:room-detail' pk=option.pk %}" data-mtitle="{{option.name}}" data-m="#pdetail">
                         {{option.name}}<br>
                         {% if option.is_booked %}

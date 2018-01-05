@@ -191,9 +191,9 @@ $(function() {
         addRoomDetails(dynamicData,roomUrl,'post')
         .done(function(data){
             console.log(data);
-            amenities.parents('div').find('li.token').remove();
-            amenities.val('');
-            window.location.href = roomListUrl;
+            //amenities.parents('div').find('li.token').remove();
+            //amenities.val('');
+            window.location.href= data.edit_url; //window.location.href = roomListUrl;
         })
         .fail(function(error){
             console.log('error');
@@ -271,6 +271,25 @@ $(function() {
               required:true
             },
           }
+        });
+
+        // delete room image
+        // -----------------------------------
+        var deleteImage = $('.delete-image');
+        var pk;
+        deleteImage.on('click',function(){
+            dynamicData = {};
+            pk = $(this).data('pk');
+            dynamicData['track'] = 'Delete room image';
+            addRoomDetails(dynamicData,$(this).data('href'),'post')
+            .done(function(data){
+                $('#delete-image'+pk).remove();
+                alertUser('Image deleted');
+                console.log(data);
+            })
+            .fail(function(err){
+                console.warn(err);
+            });
         });
 
 
