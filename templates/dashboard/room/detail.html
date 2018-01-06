@@ -94,13 +94,24 @@
                                     <span class="input-group-addon"><i class="icon-calendar22"></i></span>
                                     <span>{{book.check_in}}</span>
                                 </div>
+                                   <!-- Calendar widget -->
+                                    <div class="panel has-scroll">
+                                        <div class="datepicker-check-in no-border"></div>
+                                    </div>
+                                    <!-- /calendar widget -->
                                </div>
                                <div class="col-md-6">
                                 <label>Check-out Date: </label>
                                 <div class="input-group">
                                     <span class="input-group-addon"><i class="icon-calendar22"></i></span>
                                     <span style="margin-top:6px;">{{book.check_out}}</span>
+
                                 </div>
+                                   <!-- Calendar widget -->
+                                    <div class="panel has-scroll">
+                                        <div class="datepicker no-border"></div>
+                                    </div>
+                                    <!-- /calendar widget -->
                                </div>
                             </div>
                         {% else %}
@@ -149,9 +160,32 @@
     <button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
 
 </div>
+<style>
+    .ui-datepicker-header { display:none }
+</style>
 <script>
     $('.daterange-basic').daterangepicker({
         applyClass: 'bg-slate-600',
         cancelClass: 'btn-default',
     });
+
+    // Date picker
+    // ------------------------------
+
+    // Default functionality
+    var check_out = "{{book.check_out|date:'Y-m-d'}}";
+    var check_in = "{{book.check_in|date:'Y-m-d'}}";
+
+    $(".datepicker").datepicker({
+        changeMonth: true,
+        changeYear: true,
+        dateFormat : 'dd-mm-yy',
+        defaultDate: new Date(new Date(moment(check_out)))
+        }).datepicker( "option", "disabled", true );
+    $(".datepicker-check-in").datepicker({
+        changeMonth: true,
+        changeYear: true,
+        dateFormat : 'dd-mm-yy',
+        defaultDate: new Date(new Date(moment(check_in)))
+        }).datepicker( "option", "disabled", true );
 </script>

@@ -47,6 +47,7 @@
     box-shadow: 0 4px 6px rgba(0,0,0,.1);
 }
 </style>
+
 {% endblock %}
 {% block content %}
 
@@ -73,12 +74,12 @@
                         {% for instance in objects %}
                         {% if instance.floor == floor %}
                          <div class="col-sm-6 col-md-4">
-                            <div class="panel">
+                            <div class="panel" {% if instancej.room_images.first.image %} style="z-index:1;background-image: url('{{ instance.room_images.first.image.crop.400x400 }}');" {% endif %}>
                                 <div class="panel-body">
                                     <div id="ribbon{{instance.id}}" class="ribbon-container {% if not instance.is_booked %}hidden{% endif %}">
                                         <div class="ribbon bg-danger">Booked</div>
                                     </div>
-                                    <div class="media no-margin">
+                                    <div class="media no-margin text-whi" style="z-index: 2;">
                                         <div class="media-body">
                                             <h3 class="no-margin text-semibold">{{instance.name}}</h3>
                                             <span>&nbsp;<br></span>
@@ -180,6 +181,7 @@
 <script type="text/javascript" src="{% static 'backend/js/plugins/pickers/datetimepicker/bootstrap-datetimepicker.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/plugins/tokenize/tokenize2.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/plugins/pickers/daterangepicker.js' %}"></script>
+<script type="text/javascript" src="{% static 'backend/js/core/libraries/jquery_ui_widgets.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/plugins/vue/vue.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'backend/js/booking/vue/booking.js' %}"></script>
 <script >

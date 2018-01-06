@@ -299,7 +299,7 @@
        data-variantdetail="{% url 'dashboard:have-variants' %}"
        data-addattrurl="{% url 'dashboard:product-attr-add' %}"
        data-addclassurlb="{% url 'dashboard:attr_list_f32d' %}"
-       data-uploadimages = "{% url 'dashboard:room-add-image' pk=room.pk %}"
+       {% if room.pk %}data-uploadimages = "{% url 'dashboard:room-add-image' pk=room.pk %}"{% endif %}
        data-pk="{{room.pk}}"
        data-roomdata="{% url 'dashboard:room-add' %}"
        data-addclassurl="{% url 'dashboard:product-class-form32b' %}">
