@@ -103,7 +103,7 @@
           <table class="table room-striped room-hover dataroom-header-footer" style="border-bottom:1px solid #ddd;">
                 <thead>
                   <tr class="bg-primary">
-                    <th>Image</th>
+                    <th width="14%">Image</th>
                     <th>Name</th>
                     <th>Floor</th>
                     <th>Pricing</th>
@@ -122,6 +122,8 @@
                     <td>
                         {% if option.room_images.first.image %}
                         <img src="{{ option.room_images.first.image.crop.40x40 }}">
+                        {% else %}
+                        <img style="width:60%" src="{% static 'backend/images/rooms/room.jpg' %}" alt="">
                         {% endif %}
                     </td>
                       <!--name-->

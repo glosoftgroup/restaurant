@@ -87,7 +87,7 @@
 {% block content %}
 <div class="panel panel-flat">
     <div class="panel-heading">
-        <h6 class="panel-title">Left side placement</h6>
+        <h6 class="panel-title">Add rooms</h6>
         <div class="heading-elements">
             <ul class="icons-list">
                 <li><a data-action="collapse"></a></li>
@@ -135,21 +135,12 @@
                                                     <option {% if not room.pk %} selected="selected" {% endif %} value="0">
                                                         Ground
                                                     </option>
-                                                    <option value="1">
-                                                        1
+                                                    {% for i in n %}
+                                                     <option value="{{i}}">
+                                                        {{i}}
                                                     </option>
-                                                    <option value="2">
-                                                        2
-                                                    </option>
-                                                    <option value="3">
-                                                        3
-                                                    </option>
-                                                    <option value="4">
-                                                        4
-                                                    </option>
-                                                    <option value="5">
-                                                        5
-                                                    </option>
+                                                    {% endfor %}
+
                                                 </select>
                                                 <span class="help-block text-warning"></span>
                                             </div>

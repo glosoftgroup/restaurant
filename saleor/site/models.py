@@ -26,6 +26,9 @@ class SiteSettings(models.Model):
         blank=True)
     loyalty_point_equiv = models.IntegerField( pgettext_lazy('Site field', 'loyalty points equivalency'),
         validators=[MinValueValidator(0)], default=Decimal(0))
+    floors = models.IntegerField(pgettext_lazy('Site field', 'floors'),
+                                              validators=[MinValueValidator(0)], default=Decimal(6))
+
     max_credit_date = models.IntegerField( pgettext_lazy('Site field', 'Maximum credit sale expiration in days'),
         validators=[MinValueValidator(0)], unique=True, default=Decimal(0)) 
     

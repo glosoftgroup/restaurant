@@ -1,0 +1,25 @@
+{% load i18n %}
+<div class="row">
+      <div class="panel-body">
+        <form method="post" id="product-settings" enctype="multipart/form-data" novalidate>
+          <div class="ard-content-form">
+            {% csrf_token %}
+            <div class="col-md-12">
+             <h5 style="border-bottom:1px solid #626862;display:inline-block;margin-bottom:20px;" class="text-bold"> Room Booking Settings</h5>
+            </div>
+             <div class="col-md-4">
+                <div class="form-group">
+                  <label>Number of Floors:</label>
+                  <input type="number" placeholder="Floors" class="form-control" value="{{site.floors}}" id="floors" name="floors">
+                </div>
+              </div>
+
+             <div class="col-md-2 text-left" style="margin-top: 25px;">
+              <button  type="submit"  id="booking_btn" class="btn  btn-primary waves-effect waves-light" onclick="return false;">
+                Save
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>

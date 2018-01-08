@@ -12,6 +12,7 @@ from ..views import staff_member_required
 from saleor.room.models import Room as Table
 from saleor.booking.models import Book, BookingHistory
 from saleor.room.models import RoomAmenity, RoomImage, Package, Pricing
+from saleor.site.models import SiteSettings
 from .forms import RoomImageForm
 from ...decorators import user_trail
 import logging
@@ -80,7 +81,7 @@ def add(request):
         package_json = []
         for package in packages:
             package_json.append({'name': str(package.name)})
-        ctx = {'table_name': table_name, 'packages': packages, 'package_json': package_json}
+        ctx = {'n': range(SiteSettings.objects.get(pk=1).floors), 'table_name': table_name, 'packages': packages, 'package_json': package_json}
         return TemplateResponse(request, 'dashboard/room/form.html', ctx)
 
 

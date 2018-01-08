@@ -10,6 +10,10 @@ function updateSettings(dynamicData,url,method){
     });
 
 }
+
+var pageUrls   = $('.pageUrls');
+var updateSettingsUrl = pageUrls.data('updateurl');
+
 $(function() {
 	var smsApiBtn = $('#sms_api_btn');
 	var api_key = $('#api_key');
@@ -103,3 +107,28 @@ $(function() {
 //    }
   });
 });
+
+
+//room booking scripts
+$(function() {
+	var bookingBtn = $('#booking_btn');
+	var floors = $('#floors');
+	var dynamicData = {};
+
+	bookingBtn.on('click', function(){
+	    dynamicData = {};
+	    if(floors){
+	        dynamicData['floors'] = floors.val();
+	    }
+	    updateSettings(dynamicData,updateSettingsUrl,'post')
+		.done(function(data){
+			alertUser('Settings Updated successfully');
+		})
+		.fail(function(){
+			alertUser('Error occured','bg-danger','Ooops');
+		}
+		);
+	});
+
+});
+//./booking
