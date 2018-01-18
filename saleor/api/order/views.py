@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import generics
 from django.contrib.auth import get_user_model
 from ...orders.models import Orders, OrderedItem
+from ...table.models import Table
 from ...sale.models import (
                             Sales,
                             SoldItem,
@@ -176,6 +177,11 @@ class TableOrdersListAPIView(generics.ListAPIView):
         serializer = ListOrderSerializer(queryset, context=serializer_context, many=True)
         return Response(serializer.data)
 
+    def delete(self, request, pk=None):
+        orders = Orders.objects.filter(table__pk=pk)
+        orders.delete()
+        return Response("successfully delete, status=204")
+
 
 class OrderUpdateAPIView(generics.RetrieveUpdateAPIView):
     """
@@ -194,6 +200,9 @@ class OrderUpdateAPIView(generics.RetrieveUpdateAPIView):
         instance = serializer.save(user=self.request.user)
         if instance.status == 'fully-paid':
             send_to_sale(instance)
+        elif instance.status == 'cancelled':
+            instance.delete()
+            return 'Successfully deleted, status: 204'
         user_trail(self.request.user.name,
                    'made a sale:#' + str(serializer.data['invoice_number']) + ' sale worth: ' + str(
                        serializer.data['total_net']), 'add')

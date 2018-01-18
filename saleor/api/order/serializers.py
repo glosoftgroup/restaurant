@@ -279,6 +279,23 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
             instance.status = validated_data.get('status', instance.status)
         instance.last_status_change = now()
         instance.save()
+        try:
+            ordered_items_data = validated_data.pop('ordered_items')
+        except Exception as e:
+            raise ValidationError('Ordered items field should not be empty')
+        items = (instance.ordered_items).all()
+        items.delete()
+        for ordered_item_data in ordered_items_data:
+          OrderedItem.objects.create(orders=instance, **ordered_item_data)
+          try:
+              stock = Stock.objects.get(variant__sku=ordered_item_data['sku'])
+              if stock:
+                  Stock.objects.decrease_stock(stock, ordered_item_data['quantity'])
+              else:
+                  print 'stock not found'
+          except Exception as e:
+              print 'Error reducing stock!'
+
         return instance
 
 
