@@ -71,6 +71,7 @@ class ListOrderSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     ordered_items = ItemSerializer(many=True)
     payment_data = JSONField()
+    old_orders = JSONField()
 
     class Meta:
         model = Orders
@@ -88,7 +89,8 @@ class OrderSerializer(serializers.ModelSerializer):
                   'payment_data',
                   'status',
                   'total_tax',
-                  'discount_amount'
+                  'discount_amount',
+                  'old_orders'
                   )
 
     def validate_total_net(self, value):
@@ -179,6 +181,12 @@ class OrderSerializer(serializers.ModelSerializer):
 
         order.save()
         # add payment options
+        if validated_data.get('old_orders'):
+          for i in validated_data.get('old_orders'):
+            old_order = Orders.objects.get(invoice_number=i)
+            old_order.status = "merged to "+str(order.invoice_number)
+            old_order.save()
+            print str(old_order.invoice_number)+" - "+ str(i)
 
         for ordered_item_data in ordered_items_data:
             OrderedItem.objects.create(orders=order, **ordered_item_data)

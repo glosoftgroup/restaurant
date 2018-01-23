@@ -98,6 +98,7 @@ class Orders(models.Model):
     carry = models.CharField(
         verbose_name=pgettext_lazy('Sales field', 'carry name'),
         max_length=255, default='', blank=True)
+    old_orders = JSONField(null=True, blank=True)
     objects = OrdersManager()
 
     class Meta:
@@ -117,8 +118,10 @@ class Orders(models.Model):
     def get_status(self):
         if self.status == 'fully-paid':
             return 'Complete'
-        else:
+        elif self.status == 'payment-pending':
             return "Pending"
+        else:
+            return self.status
 
 
 @python_2_unicode_compatible
