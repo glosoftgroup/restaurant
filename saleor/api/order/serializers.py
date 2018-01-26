@@ -79,6 +79,7 @@ class OrderSerializer(serializers.ModelSerializer):
                   'user',
                   'invoice_number',
                   'table',
+                  'room',
                   'sale_point',
                   'total_net',
                   'sub_total',
@@ -171,6 +172,7 @@ class OrderSerializer(serializers.ModelSerializer):
             order.table = validated_data.get('table')
         else:
             order.carry = 'Take away'
+        order.room = validated_data.get('room')
         order.sale_point = validated_data.get('sale_point')
         order.amount_paid = validated_data.get('amount_paid')
         order.status = status
@@ -214,6 +216,7 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
                   'balance',
                   'terminal',
                   'table',
+                  'room',
                   'amount_paid',
                   'status',
                   'total_tax',
@@ -279,6 +282,7 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
         terminal.amount += Decimal(validated_data.get('amount_paid', instance.amount_paid))
         terminal.save()
         instance.table = validated_data.get('table', instance.table)
+        instance.room = validated_data.get('room', instance.room)
         instance.debt = instance.debt - validated_data.get('amount_paid', instance.amount_paid)
         instance.amount_paid = instance.amount_paid + validated_data.get('amount_paid', instance.amount_paid)
         if instance.amount_paid >= instance.total_net:

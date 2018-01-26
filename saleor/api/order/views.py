@@ -182,6 +182,28 @@ class TableOrdersListAPIView(generics.ListAPIView):
         orders.delete()
         return Response("successfully delete, status=204")
 
+class RoomOrdersListAPIView(generics.ListAPIView):
+    queryset = Orders.objects.all()
+    serializer_class = ListOrderSerializer(instance=queryset, context=serializer_context)
+
+    def list(self, request, pk=None):
+        serializer_context = {
+            'request': Request(request),
+        }
+        # Note the use of `get_queryset()` instead of `self.queryset`
+        query = self.request.GET.get('q')
+        if query:
+            queryset = self.get_queryset().filter(room__pk=pk).filter(status=query)
+        else:
+            queryset = self.get_queryset().filter(room__pk=pk)
+        serializer = ListOrderSerializer(queryset, context=serializer_context, many=True)
+        return Response(serializer.data)
+
+    def delete(self, request, pk=None):
+        orders = Orders.objects.filter(table__pk=pk)
+        orders.delete()
+        return Response("successfully delete, status=204")
+
 
 class OrderUpdateAPIView(generics.RetrieveUpdateAPIView):
     """

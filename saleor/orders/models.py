@@ -13,6 +13,7 @@ from jsonfield import JSONField
 from ..table.models import Table
 from ..salepoints.models import SalePoint
 from ..customer.models import Customer
+from ..room.models import Room
 from ..sale.models import Terminal, PaymentOption
 from . import OrderStatus
 
@@ -62,6 +63,9 @@ class Orders(models.Model):
     table = models.ForeignKey(
         Table, related_name='table_orders', blank=True, default='', null=True, on_delete=models.SET_NULL,
         verbose_name=pgettext_lazy('Orders field', 'table'))
+    room = models.ForeignKey(
+        Room, verbose_name=pgettext_lazy('Orders field', 'rooms'),
+        related_name='order_room',  blank=True, null=True,)
     sale_point = models.ForeignKey(
         SalePoint, related_name='sale_point', blank=True, default='',
         verbose_name=pgettext_lazy('Orders field', 'Sale point'))
