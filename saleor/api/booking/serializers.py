@@ -4,6 +4,7 @@ from rest_framework import serializers
 from django.utils.formats import localize
 from django.contrib.auth import get_user_model
 from saleor.booking.models import Book as Table
+from ...orders.models import Orders
 from saleor.booking.models import Payment
 User = get_user_model()
 
@@ -19,6 +20,7 @@ class BookingListSerializer(serializers.ModelSerializer):
     booking_delete = serializers.HyperlinkedIdentityField(view_name='dashboard:booking-delete')
     booking_detail = serializers.HyperlinkedIdentityField(view_name='dashboard:booking-detail')
     orders_url = serializers.HyperlinkedIdentityField(view_name='order-api:api-room-orders')
+    new_orders = serializers.SerializerMethodField()
 
     class Meta:
         model = Table
@@ -41,7 +43,8 @@ class BookingListSerializer(serializers.ModelSerializer):
                   'booking_edit',
                   'booking_delete',
                   'booking_detail',
-                  'orders_url'
+                  'orders_url',
+                  'new_orders',
                  )
 
     def get_price_amount(self, obj):
@@ -61,6 +64,9 @@ class BookingListSerializer(serializers.ModelSerializer):
 
     def get_date_out(self, obj):
         return localize(obj.check_out)
+
+    def get_new_orders(self, obj):
+        return len(Orders.objects.get_room_new_orders(obj.room_id))
 
 
 class PaymentListSerializer(serializers.ModelSerializer):

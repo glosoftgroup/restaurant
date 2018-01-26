@@ -29,6 +29,11 @@ class OrdersManager(models.Manager):
 
         return self.get_queryset().filter(
             models.Q(table=table_pk), models.Q(status='payment-pending'))
+        
+    def get_room_new_orders(self, room_pk):
+
+        return self.get_queryset().filter(
+            models.Q(room=room_pk), models.Q(status='payment-pending'))
 
 
 
