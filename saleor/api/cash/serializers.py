@@ -51,6 +51,19 @@ class UserAuthorizationSerializer(serializers.Serializer):
             raise ValidationError('Terminal specified does not extist')
         return value
 
+
+class UserLockAuthorizationSerializer(serializers.Serializer):
+    code = serializers.CharField(max_length=200,allow_blank=True,required=False)
+
+    def validate_code(self,value):
+        data = self.get_initial()
+        code = data.get('code')
+        try:
+            self.user = User.objects.get(code=code)
+            return value
+        except:
+            raise ValidationError('User does not exist')
+
 class UserTransactionSerializer(serializers.ModelSerializer):
     email = serializers.CharField(max_length=200)
     password = serializers.CharField(max_length=200)

@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 
 from .serializers import (
      UserTransactionSerializer,
+     UserLockAuthorizationSerializer,
      UserAuthorizationSerializer,
 	 TerminalListSerializerNoAuth,
      TerminalListSerializer
@@ -54,6 +55,32 @@ def login(request):
     elif request.method == 'GET':
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
+
+
+@api_view(['GET', 'POST'])
+def lock_login(request):
+    serializer = UserLockAuthorizationSerializer(data=request.data)
+    if request.method == 'POST':
+        if serializer.is_valid():
+            code = serializer.data['code']
+            try:
+                terminal = serializer.data['terminal']
+            except:
+                terminal = 'Terminal not set'
+            kwargs = {'code': code}
+            try:
+                user = get_user_model().objects.get(**kwargs)
+                if user.is_active and user.has_perm('sales.make_sale'):
+                    record_trail(user.name,user,terminal)
+                    return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+                else:
+                    return Response({'message':'Permission Denied!'}, status=status.HTTP_401_UNAUTHORIZED)
+            except:
+                return Response(serializer.errors, status=status.HTTP_403_FORBIDDEN)
+        else:
+            return Response(serializer.errors, status=status.HTTP_403_FORBIDDEN)
+    elif request.method == 'GET':
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 def record_trail(loggedin, user, terminal):
     trail = str(user.name)+' '+\

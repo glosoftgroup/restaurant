@@ -457,7 +457,7 @@ class UserSerializer(serializers.ModelSerializer):
     permissions = SerializerMethodField()
     class Meta:
         model = User
-        fields = ['id','email','name','permissions']
+        fields = ['id', 'email', 'name', 'code', 'permissions']
     def get_permissions(self,obj):
         info_logger.info('User: '+str(obj.name)+' '+str(obj.email)+' logged in via api')
         user_trail(obj.name, 'logged in via api','view')

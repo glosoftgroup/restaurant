@@ -230,6 +230,8 @@ def user_process(request):
     user = User.objects.all()
     if request.method == 'POST':
         name = (request.POST.get('name')).lower()
+        fullname = request.POST.get('fullname')
+        code = (request.POST.get('code')).lower()
         email = request.POST.get('email')
         password = request.POST.get('password')
         encr_password = make_password(password)
@@ -240,6 +242,8 @@ def user_process(request):
         job_title = request.POST.get('job_title')
         new_user = User(
             name=name,
+            fullname=fullname,
+            code=code,
             email=email,
             password=encr_password,
             nid=nid,
@@ -314,6 +318,8 @@ def user_update(request, pk):
 
     if request.method == 'POST':
         name = (request.POST.get('user_name')).lower()
+        fullname = request.POST.get('user_fullname')
+        code = (request.POST.get('user_code')).lower()
         email = request.POST.get('user_email')
         password = request.POST.get('user_password')
         nid = request.POST.get('user_nid')
@@ -328,6 +334,8 @@ def user_update(request, pk):
             encr_password = make_password(password)
         if image :
             user.name = name
+            user.fullname = fullname
+            user.code = code
             user.email = email
             user.password = encr_password
             user.nid = nid
@@ -354,6 +362,8 @@ def user_update(request, pk):
             return HttpResponse("success with image")
         else:
             user.name = name
+            user.fullname = fullname
+            user.code = code
             user.email = email
             user.password = encr_password
             user.nid = nid
@@ -437,7 +447,10 @@ def user_search( request ):
         if q is not None:
             users = User.objects.filter(
                 Q( name__icontains = q ) |
-                Q( email__icontains = q ) | Q( mobile__icontains = q ) ).order_by('-id' )
+                Q( fullname__icontains = q ) |
+                Q( code__icontains = q ) |
+                Q( email__icontains = q ) | 
+                Q( mobile__icontains = q ) ).order_by('-id' )
 
             if request.GET.get('gid'):
                 users = users.filter(groups__id=request.GET.get('gid'))

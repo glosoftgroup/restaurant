@@ -17,8 +17,9 @@ def pdf( request ):
 		group = None
 		if q is not None:
 			users = User.objects.filter(
-			Q( name__icontains = q ) | Q( email__icontains = q ) |
-			Q( mobile__icontains = q ) | Q(groups__id__icontains=q)).order_by('-id')
+				Q( fullname__icontains = q ) | Q( code__icontains = q ) |
+				Q( name__icontains = q ) | Q( email__icontains = q ) |
+				Q( mobile__icontains = q ) | Q(groups__id__icontains=q)).order_by('-id')
 
 			if gid:
 				users = users.filter(groups__id=gid)
