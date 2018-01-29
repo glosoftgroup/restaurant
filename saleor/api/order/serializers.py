@@ -41,13 +41,15 @@ class ItemSerializer(serializers.ModelSerializer):
 
 
 class ListOrderSerializer(serializers.ModelSerializer):
-    ordered_items = ItemSerializer(many=True)
+    queryset = OrderedItem.objects.filter(sale_point__pk=9)
+    ordered_items = ItemSerializer(many=True, instance=queryset)
     update_url = HyperlinkedIdentityField(view_name='order-api:update-order')
 
     class Meta:
         model = Orders
         fields = ('id',
                   'user',
+                  'created',
                   'invoice_number',
                   'table',
                   'sale_point',
