@@ -71,6 +71,8 @@ class ListOrderSerializer(serializers.ModelSerializer):
 
 class RestaurantListOrderSerializer(serializers.ModelSerializer):
     ordered_items =  serializers.SerializerMethodField()
+    table = serializers.SerializerMethodField()
+    total_net = serializers.SerializerMethodField()
     update_url = HyperlinkedIdentityField(view_name='order-api:update-order')
 
     class Meta:
@@ -101,6 +103,22 @@ class RestaurantListOrderSerializer(serializers.ModelSerializer):
       items = OrderedItem.objects.filter(orders__pk=orders.pk, sale_point__pk=self.context['pk'])  # Whatever your query may be
       serializer = ItemSerializer(instance=items, many=True)
       return serializer.data
+
+    def get_table(self, orders):
+      try:
+          return orders.table.name
+      except Exception as e:
+          return 'Take away'
+
+    def get_total_net(self, orders):
+      initnumber = 0
+      try:
+          items = OrderedItem.objects.filter(orders__pk=orders.pk, sale_point__pk=self.context['pk'])  # Whatever your query may be
+          for i in items:
+            initnumber += i.total_cost
+          return initnumber
+      except Exception as e:
+          return initnumber
 
 class OrderSerializer(serializers.ModelSerializer):
     ordered_items = ItemSerializer(many=True)
@@ -317,6 +335,7 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
         terminal.save()
         instance.table = validated_data.get('table', instance.table)
         instance.room = validated_data.get('room', instance.room)
+        instance.total_net = validated_data.get('total_net', instance.total_net)
         instance.debt = instance.debt - validated_data.get('amount_paid', instance.amount_paid)
         instance.amount_paid = instance.amount_paid + validated_data.get('amount_paid', instance.amount_paid)
         if instance.amount_paid >= instance.total_net:
