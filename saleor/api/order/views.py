@@ -16,7 +16,8 @@ from .serializers import (
     ListOrderSerializer,
     OrderSerializer,
     OrderUpdateSerializer,
-    ListOrderItemSerializer
+    ListOrderItemSerializer,
+    RestaurantListOrderSerializer
      )
 from ...decorators import user_trail
 import logging
@@ -185,7 +186,7 @@ class TableOrdersListAPIView(generics.ListAPIView):
 
 class RestaurantOrdersListAPIView(generics.ListAPIView):
     queryset = Orders.objects.all()
-    serializer_class = ListOrderSerializer(instance=queryset, context=serializer_context)
+    serializer_class = RestaurantListOrderSerializer(instance=queryset, context=serializer_context)
 
     def list(self, request, pk=None):
         serializer_context = {
@@ -195,10 +196,10 @@ class RestaurantOrdersListAPIView(generics.ListAPIView):
         # Note the use of `get_queryset()` instead of `self.queryset`
         query = self.request.GET.get('q')
         if query:
-            queryset = self.get_queryset().filter(ordered_items__sale_point__pk=pk).filter(Q(status='pending-payment') | Q(invoice_number__icontains=query))
+            queryset = self.get_queryset().filter(ordered_items__sale_point__pk=pk).filter(Q(status='pending-payment') | Q(invoice_number__icontains=query)).distinct()
         else:
-            queryset = self.get_queryset().filter(ordered_items__sale_point__pk=pk)
-        serializer = ListOrderSerializer(queryset, context=serializer_context, many=True)
+            queryset = self.get_queryset().filter(ordered_items__sale_point__pk=pk).distinct()
+        serializer = RestaurantListOrderSerializer(queryset, context=serializer_context, many=True)
         return Response(serializer.data)
 
     def delete(self, request, pk=None):

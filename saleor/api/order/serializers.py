@@ -41,8 +41,7 @@ class ItemSerializer(serializers.ModelSerializer):
 
 
 class ListOrderSerializer(serializers.ModelSerializer):
-    queryset = OrderedItem.objects.filter(sale_point__pk=9)
-    ordered_items = ItemSerializer(many=True, instance=queryset)
+    ordered_items = ItemSerializer(many=True)
     update_url = HyperlinkedIdentityField(view_name='order-api:update-order')
 
     class Meta:
@@ -69,6 +68,39 @@ class ListOrderSerializer(serializers.ModelSerializer):
                   'discount_amount'
                   )
 
+
+class RestaurantListOrderSerializer(serializers.ModelSerializer):
+    ordered_items =  serializers.SerializerMethodField()
+    update_url = HyperlinkedIdentityField(view_name='order-api:update-order')
+
+    class Meta:
+        model = Orders
+        fields = ('id',
+                  'user',
+                  'created',
+                  'invoice_number',
+                  'table',
+                  'sale_point',
+                  'total_net',
+                  'sub_total',
+                  'balance',
+                  'terminal',
+                  'amount_paid',
+                  'update_url',
+                  'ordered_items',
+                  'customer',
+                  'mobile',
+                  'customer_name',
+                  'payment_data',
+                  'status',
+                  'total_tax',
+                  'discount_amount'
+                  )
+
+    def get_ordered_items(self, orders):
+      items = OrderedItem.objects.filter(orders__pk=orders.pk, sale_point__pk=self.context['pk'])  # Whatever your query may be
+      serializer = ItemSerializer(instance=items, many=True)
+      return serializer.data
 
 class OrderSerializer(serializers.ModelSerializer):
     ordered_items = ItemSerializer(many=True)
