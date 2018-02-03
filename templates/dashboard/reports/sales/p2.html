@@ -22,7 +22,7 @@
                         <tr class="bg-primary">
                           <th>Transaction Date</th>
                           <th>Receipt No</th>
-                          <th>Table</th>
+                          <th>Table/Room</th>
                           <th>Cashier</th>
                           <th class="hidden">Payment Mode</th>
                           <th>Quantity</th>
@@ -36,7 +36,13 @@
                           <tr class='clickable-row' id="{{sale.pk }}">
                             <td class="td" data-href="{% url 'dashboard:sale-detail' pk=sale.pk point=point_pk %}">{{sale.created|date:"d-m-Y H:i a"}}</td>
                             <td class="td" data-href="{% url 'dashboard:sale-detail' pk=sale.pk point=point_pk %}">{{sale.invoice_number }}</td>
-                            <td class="td" data-href="{% url 'dashboard:sale-detail' pk=sale.pk point=point_pk %}">{% if sale.table.name %}{{ sale.table.name }}{% else %}Take Away{% endif %}</td>
+                            <td class="td" data-href="{% url 'dashboard:sale-detail' pk=sale.pk point=point_pk %}">
+                              {% if sale.table.name %}
+                                {{ sale.table.name }}
+                             {% elif sale.room.name %}  
+                                Rm {{ sale.room.name }} 
+                             {% else %} Take Away {% endif %}
+                            </td>
                             <td class="td" data-href="{% url 'dashboard:sale-detail' pk=sale.pk point=point_pk %}">{% if sale.user.name %}{{sale.user.name}}{% else %}{{sale.user.email}}{% endif %}</td>
                             <td class="td hidden" data-href="{% url 'dashboard:sale-detail' pk=sale.pk point=point_pk %}">
                                 {% if sale.payment_options %}

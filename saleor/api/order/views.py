@@ -289,6 +289,7 @@ def send_to_sale(credit):
 
     try:
         sale.table = credit.table
+        sale.room = credit.room
         sale.carry = 'Sitting'
     except Exception as e:
         sale.carry = 'Take Away'

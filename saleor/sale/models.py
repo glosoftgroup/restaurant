@@ -13,6 +13,7 @@ from ..customer.models import Customer
 from ..site.models import SiteSettings
 from ..salepoints.models import SalePoint
 from ..table.models import Table
+from ..room.models import Room
 
 from . import OrderStatus
 from . import TransactionStatus
@@ -168,6 +169,8 @@ class Sales(models.Model):
     table = models.ForeignKey(
         Table, related_name='table_sales', blank=True, null=True, default='', on_delete=models.SET_NULL,
         verbose_name=pgettext_lazy('Sale field', 'table'))
+    room = models.ForeignKey(
+        Room, verbose_name=pgettext_lazy('Orders field', 'rooms'), default='', blank=True, null=True, on_delete=models.SET_NULL)
 
     class Meta:
         ordering = ('-last_status_change',)
