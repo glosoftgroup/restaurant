@@ -108,6 +108,7 @@
           <table class="table room-striped room-hover dataroom-header-footer" style="border-bottom:1px solid #ddd;">
                 <thead>
                   <tr class="bg-primary">
+                    <th>Image</th>
                     <th>Name</th>
                     <th>Email</th>
                     <th>Mobile</th>
@@ -137,6 +138,9 @@
                 <!--listing template-->
                 <template v-for="item in items">
                     <tr>
+                      <td>
+                            <img :src="item.image" alt="" class="circle teal img-responsive img-circle" style="width: 40px;height: 40px;"/>
+                        </td>
                         <td>
                             ${item.name}<br>
                         </td>
@@ -153,6 +157,7 @@
                             <div class="btn-group">
                             <button  type="button" class="btn btn-default dropdown-toggle legitRipple" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             action
+                            <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu edit-dropdown" >
                                 <li class="td">

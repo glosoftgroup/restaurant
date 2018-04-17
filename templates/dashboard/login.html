@@ -24,7 +24,7 @@
     
 
     <!-- Global stylesheets -->
-  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,100,500,700,900" rel="stylesheet" type="text/css">
+  <link href="{% static 'backend/css/roboto/roboto.css' %}" rel="stylesheet" type="text/css">
   <link href="{% static 'backend/css/icons/icomoon/styles.css' %}" rel="stylesheet" type="text/css">
   <link href="{% static 'backend/css/icons/fontawesome/styles.min.css' %}" rel="stylesheet" type="text/css">
   <link href="{% static 'backend/css/bootstrap.css' %}" rel="stylesheet" type="text/css">
@@ -41,11 +41,40 @@
   <!-- /global stylesheets -->
 
     {% block custom_css %}
-
+    <style>
+      .slideShowContainter{
+        z-index: -1;
+        position: fixed;
+        width:100%;
+      }
+      .slideShow{
+          list-style-type:none;
+          padding-left:0px !important;
+      }
+      .slideShow li img{
+        /*width:auto;
+        height: 100%;*/
+      }
+      #loginForm .panel {
+        background-color: rgba(255,255,255, 0.7) !important;
+      }
+      .form-control{border-color: transparent transparent #bdb2b2;}
+    </style>
     {% endblock %}
   </head>
 
   <body class="{% block body_class %}{% endblock %} login-container">
+    <div class="slideShowContainter">
+      <ul class="slideShow">
+          <li><img src="{% static 'backend/images/backgrounds/1.jpg' %}"/></li>
+          <li><img src="{% static 'backend/images/backgrounds/2.jpg' %}"/></li>
+          <li><img src="{% static 'backend/images/backgrounds/3.jpg' %}"/></li>
+          <li><img src="{% static 'backend/images/backgrounds/4.jpg' %}"/></li>
+          <li><img src="{% static 'backend/images/backgrounds/5.jpg' %}"/></li>
+          <li><img src="{% static 'backend/images/backgrounds/6.jpg' %}"/></li>
+
+      </ul>
+    </div>
      <!-- Page container -->
   <div class="page-container">
     <!-- Page content -->
@@ -67,7 +96,7 @@
                   <div class="icon-object border-pink-400 text-pink-400"><i class="icon-reading"></i></div>
                   {% endif %}
 
-                <h5 class="content-group">Login to your account <small class="display-block">Enter your credentials below</small></h5>
+                <h5 class="content-group">Login to your account <small class="display-block" style="color: #605b5b">Enter your credentials below</small></h5>
               </div>
               <div id="status" class="alert bg-danger animated slideInUp" style="display: none;">
                 <button type="button" class="close" data-dismiss="alert"><span>×</span><span class="sr-only">Close</span></button>
@@ -77,14 +106,14 @@
               <div class="form-group has-feedback has-feedback-left">
                 <input type="text" class="form-control email" name="email" placeholder="Username or Email">
                 <div class="form-control-feedback">
-                  <i class="icon-user text-muted"></i>
+                  <i class="icon-user text-muteds"></i>
                 </div>
               </div>
 
               <div class="form-group has-feedback has-feedback-left">
                 <input type="password" name="password" class="form-control password" placeholder="Password">
                 <div class="form-control-feedback">
-                  <i class="icon-lock2 text-muted"></i>
+                  <i class="icon-lock2 text-muteds"></i>
                 </div>
               </div>
 
@@ -209,6 +238,36 @@
             });
         }
        // });
+       $(function(){
+          var slides = $('.slideShow>li');
+          var slideCount = 0;
+          var totalSlides = slides.length;
+          var slideCache = [];
+
+          (function preloader(){
+            if(slideCount<totalSlides){
+              //load images
+              slideCache[slideCount] = new Image();
+              slideCache[slideCount].src = slides.eq(slideCount).find('img').attr('src');
+              slideCache[slideCount].onload = function(){
+                  slideCount++;
+                  preloader();
+                }
+              }else {
+                slideCount = 0;
+                SlideShow();
+              }
+          }());
+
+          function SlideShow(){
+            slides.eq(slideCount).fadeIn(1000).delay(5000).fadeOut(1000, function(){
+                slideCount < totalSlides - 1 ? slideCount++ : slideCount = 0;
+                SlideShow();
+            });
+          }
+
+
+       });
     </script>
    </div>
   </body>

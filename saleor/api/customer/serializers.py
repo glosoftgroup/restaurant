@@ -10,6 +10,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 from ...customer.models import Customer
 from ...sale.models import PaymentOption
+from ...utils import image64
 
 
 class CustomerListSerializer(serializers.ModelSerializer):    
@@ -18,6 +19,7 @@ class CustomerListSerializer(serializers.ModelSerializer):
     sales_url = serializers.HyperlinkedIdentityField(view_name='dashboard:customer-sales-detail')
     detail_url = serializers.HyperlinkedIdentityField(view_name='dashboard:customer-detail')
     delete_url = serializers.HyperlinkedIdentityField(view_name='dashboard:customer-delete')
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Customer
@@ -26,6 +28,7 @@ class CustomerListSerializer(serializers.ModelSerializer):
                  'name',
                  'email',                 
                  'mobile',
+                 'image',
                  'sales_url',
                  'delete_url',
                  'edit_url',
@@ -34,6 +37,14 @@ class CustomerListSerializer(serializers.ModelSerializer):
                  'redeemed_loyalty_points',
                  'cash_equivalency'
                  )
+
+    def get_image(self, obj):
+        image = ''
+        if obj.image:
+            image = obj.image.url
+        else:
+            image = image64()
+        return image
 
     def get_cash_equivalency(self, obj):
         points_eq = PaymentOption.objects.filter(name='Loyalty Points')

@@ -1,0 +1,175 @@
+{% load staticfiles %}
+<div class="row">
+    <form method="post" id="address-form" enctype="multipart/form-data">
+    {% csrf_token %} 
+         <div class="col-md-4">
+            <div class="form-group">
+              <label>Name</label>
+              <input type="text" id="name" name="name" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Mobile No.</label>
+              <input type="text" id="phone" name="phone"  class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Maturity Status</label>
+                <div class="form-group">
+                   <select class="bootstrap-select maturity_status" name="maturity_status" style="display: none;" data-width="100%" tabindex="-98">
+                      <option value="adult" >Adult</option>
+                      <option value="child" >Child</option>
+                    </select>
+                </div>
+                <input type="hidden" name="supplier_id" value="{{ customer_pk }}">
+            </div>
+         </div>
+         <div class="col-md-4">
+            <div class="form-group">
+              <label>Id / Passport No.</label>
+              <input type="text" id="id_no" name="id_no" class="form-control id_no">
+            </div>
+            <div class="form-group">
+              <label>Nationality</label>
+                <div class="form-group">
+                  <div class="multi-select-full">
+                      <select class="multiselect-full-featured" style="display: none;" name="nationality" id="multiple" placeholder="select a user...">
+                      <option value="kenya" selected="selected">Kenya</option>
+                      <option value="uganda" >Uganda</option>
+                      </select>
+                    </div>
+                </div>
+            </div>
+            
+         </div>
+         <div class="col-md-4">
+            <div class="form-group">
+                <label>Date of Birth (DOB)</label>
+                <div class="form-group">
+                  <div class="input-group">
+                      <span v-datepicker></span>
+                    <input id="dob" name="dob" class="form-control daterange-single" tabindex="-98" type="text" placeholder="yyyy-mm-dd">
+                    <span class="input-group-addon"><i class="icon-calendar22"></i></span>
+                  </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Relation</label>
+                <div class="form-group">
+                   <select name="relation" class="bootstrap-select relation" style="display: none;" data-width="100%" tabindex="-98">
+                      <option value="spouse" >Spouse</option>
+                      <option value="co-worker" >Co-Worker</option>
+                      <option value="friend" >Friend</option>
+                      <option value="sibling" >Sibling</option>
+                      <option value="parent" >Parent</option>
+                      <option value="child" >Child</option>
+                    </select>
+                </div>
+                <input type="hidden" name="supplier_id" value="{{ customer_pk }}">
+            </div>
+
+           
+         </div>
+		  <!-- action buttons -->
+         <div class="row text-right">
+             <div class="col-md-6 col-md-offset-3">
+                 <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                <button type="submit"  class="btn btn-primary pull-right" id="submit">Submit</button>
+             </div>
+		 </div>
+      </form>
+    </div>
+  <script type="text/javascript" src="{% static 'backend/js/plugins/forms/selects/bootstrap_select.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'backend/js/plugins/forms/selects/bootstrap_multiselect.js' %}"></script>
+  <script type="text/javascript" src="{% static 'backend/js/pages/form_multiselect.js' %}"></script>
+
+   <!-- scritps -->
+   <script type="text/javascript">
+   	$( document ).ready(function() {
+      $('.daterange-single').daterangepicker({
+              singleDatePicker: true,
+              locale:{format: 'YYYY-MM-DD'},
+              showDropdowns:true,
+              autoUpdateInput:false,
+              maxDate: new Date(),
+              orientation:'left'
+          },function(chosen_date) {
+              parent.date = chosen_date.format('YYYY-MM-DD');
+              $('.daterange-single').val(chosen_date.format('YYYY-MM-DD'));
+
+       });
+       $('.bootstrap-select').selectpicker();
+    // validate
+       $('#address-form').validate({
+          onkeyup: function(element) {$(element).valid()},
+          rules:{
+              name: {
+                required:true
+              },
+              id_no: {
+                required:true
+              },
+              dob: {
+                required:true
+              },
+              phone: {
+                required:true,
+                digits:true
+              }   
+
+          },
+          submitHandler: function() { 
+            
+            if(1 != ''){
+                var f = document.getElementById('address-form');
+                var formData = new FormData(f);
+                var csrf_token = jQuery("[name=csrfmiddlewaretoken]").val();
+                for (var pair of formData.entries()) {
+                    console.log(pair[0]+ ', ' + pair[1]); 
+                }
+                if (formData) {
+                      $.ajax({
+                          url: "{% url 'dashboard:add_dependency' pk=customer_pk %}",
+                          type: "POST",
+                          data: formData,
+                          processData: false,
+                          contentType: false,
+                          success:function(data){
+                             console.log(data);
+                             $("#contact_name").val('');
+
+                             done_func();
+                             $('#modal_instance2').modal('hide');
+
+                             $.jGrowl('Address added successfully,', {
+                                header: 'Well done!',
+                                theme: 'bg-success'
+                             });
+                             
+                            localStorage.setItem('user_id', data);
+                            $('.user_id').val(localStorage.getItem("user_id"));
+                            //window.location = "{% url 'dashboard:terminals'%}";
+                          },
+                          error:function(error){
+                            console.log(error);
+                            $.jGrowl('Change a few things up and try submitting again', {
+                                header: 'Oh snap!',
+                                theme: 'bg-danger'
+                            });
+                          }
+                      });
+                  } 
+            }else{
+              $.jGrowl('Image is empty fill and try submitting again', {
+                  header: 'Oh snap!',
+                  theme: 'bg-danger'
+              });
+            }
+          }
+        });
+    // end validate
+  });
+  function refreshData(data)
+  {
+  	$("#contact-list").append(data)
+  } 
+  
+   </script>

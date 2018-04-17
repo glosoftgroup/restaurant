@@ -20,7 +20,7 @@ urlpatterns = [
             (views.user_delete), name='customer-delete'),
         url(r'^edit/(?P<pk>[0-9]+)/$', permission_required('customer.change_customer', login_url='account_login')
             (views.user_edit), name='customer-edit'),
-        url(r'^user_update(?P<pk>[0-9]+)/$', views.user_update, name='customer-update'),
+        url(r'^user_update/(?P<pk>[0-9]+)/$', views.user_update, name='customer-update'),
         url(r'^customer/paginate/$', views.customer_pagination, name='customer-paginate'),
         url(r'^customer/search/$', views.customer_search, name='customer-search'),
 
@@ -41,6 +41,11 @@ urlpatterns = [
             (views.credit_report), name='customer_credit_list'),        
         url(r'^credit/paginate/$', views.credit_pagination, name='customer-credit-paginate'),
         url(r'^credit/search/$', views.credit_search, name='customer-credit-search'),
+
+        #customer dependencies
+        url(r'^delete/contact/(?P<pk>[0-9]+)/$', views.dependency_delete, name='dependency-delete'),
+        url(r'^refresh/contact/(?P<pk>[0-9]+)/$', views.refresh_dependency, name='refresh-dependency'),
+        url(r'^address/add/(?P<pk>[0-9]+)/$', views.add_dependency, name='add_dependency'),
 
 
         

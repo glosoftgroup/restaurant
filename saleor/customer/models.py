@@ -34,63 +34,48 @@ class AddressBookManager(models.Manager):
 
 @python_2_unicode_compatible
 class AddressBook(models.Model):
-    first_name = models.CharField(
-        pgettext_lazy('AddressBook field', 'given name'),
+    name = models.CharField(
+        pgettext_lazy('AddressBook field', 'Name'),
         max_length=256, blank=True)
-    last_name = models.CharField(
-        pgettext_lazy('AddressBook field', 'family name'),
+    maturity_status = models.CharField(
+        pgettext_lazy('AddressBook field', 'Child / Adult'),
         max_length=256, blank=True)
-    company_name = models.CharField(
-        pgettext_lazy('AddressBook field', 'company or organization'),
+    id_no = models.CharField(
+        pgettext_lazy('AddressBook field', 'ID or Passport No'),
         max_length=256, blank=True)
-    street_address_1 = models.CharField(
-        pgettext_lazy('AddressBook field', 'address'),
+    nationality = models.CharField(
+        pgettext_lazy('AddressBook field', 'Nationality'),
         max_length=256, blank=True)
-    street_address_2 = models.CharField(
-        pgettext_lazy('AddressBook field', 'address'),
+    dob = models.CharField(
+        pgettext_lazy('AddressBook field', 'Date of Birth'),
         max_length=256, blank=True)
-    city = models.CharField(
-        pgettext_lazy('AddressBook field', 'city'),
+    relation = models.CharField(
+        pgettext_lazy('AddressBook field', 'Relation'),
         max_length=256, blank=True)
-    city_area = models.CharField(
-        pgettext_lazy('AddressBook field', 'district'),
-        max_length=128, blank=True)
-    postal_code = models.CharField(
-        pgettext_lazy('AddressBook field', 'postal code'),
-        max_length=20, blank=True)
-    country = CountryField(
-        pgettext_lazy('AddressBook field', 'country'))
-    country_area = models.CharField(
-        pgettext_lazy('AddressBook field', 'state or province'),
-        max_length=128, blank=True)
     phone = models.CharField(
-        pgettext_lazy('AddressBook field', 'phone number'),
-        max_length=30, blank=True)    
+        pgettext_lazy('AddressBook field', 'Phone Number'),
+        max_length=30, unique=True, blank=True)
     objects = AddressBookManager()
 
     @property
     def full_name(self):
-        return '%s %s' % (self.first_name, self.last_name)
-    
+        return '%s' % (self.contact_name)
 
     class Meta:
         verbose_name = pgettext_lazy('AddressBook model', 'address book')
         verbose_name_plural = pgettext_lazy('AddressBook model', 'address books')
 
     def __str__(self):
-        if self.company_name:
-            return '%s - %s' % (self.company_name, self.full_name)
-        return self.full_name
+        if self.name:
+            return '%s - %s' % (self.name, self.nationality)
+        return self.name
 
     def __repr__(self):
         return (
-            'AddressBook(first_name=%r, last_name=%r, company_name=%r, '
-            'street_address_1=%r, street_address_2=%r, city=%r, '
-            'postal_code=%r, country=%r, country_area=%r, phone=%r)' % (
-                self.first_name, self.last_name, self.company_name,
-                self.street_address_1, self.street_address_2, self.city,
-                self.postal_code, self.country, self.country_area,
-                self.phone))
+            'AddressBook(name=%r, dob=%r, '
+            'id_no=%r, relation=%r, maturity_status=%r,  nationality=%r, phone=%r)' % (
+                self.name, self.dob, self.id_no, self.relation,
+                self.maturity_status, self.nationality, self.phone))
 
 
 class CustomerManager(BaseUserManager):
@@ -117,8 +102,12 @@ class CustomerManager(BaseUserManager):
     
 
 class Customer(models.Model):
-    email = models.EmailField(pgettext_lazy('Customer field', 'email'), null=True, blank=True)
-    name = models.CharField(max_length=100, null=True, blank=True)
+    name = models.CharField(pgettext_lazy('Customer field', 'Name'), max_length=100, null=True, blank=True)
+    email = models.EmailField(pgettext_lazy('Customer field', 'Email'), null=True, blank=True)
+    nid = models.CharField(pgettext_lazy('Customer field', 'ID No / Passport'), max_length=128, null=True, blank=True)
+    nationality = models.CharField(pgettext_lazy('Customer field', 'Country'), max_length=128, null=True, blank=True)
+    dob = models.CharField(pgettext_lazy('Customer field', 'Date of Birth'), max_length=128, null=True, blank=True)
+    description = models.CharField(pgettext_lazy('Customer field', 'User Description'), max_length=500, null=True, blank=True)
     addresses = models.ManyToManyField(
         AddressBook, blank=True,
         verbose_name=pgettext_lazy('Customer field', 'addresses'))   
@@ -130,9 +119,7 @@ class Customer(models.Model):
         pgettext_lazy('Customer field', 'loyalty points'), default=Decimal(0), max_digits=100, decimal_places=2)    
     redeemed_loyalty_points = models.DecimalField(
         pgettext_lazy('Customer field', 'Redeemed loyalty points'), default=Decimal(0), max_digits=100, decimal_places=2)    
-    
-    nid = models.CharField(max_length=100, null=True,blank=True)
-    mobile = models.CharField(max_length=100, null=True, blank=True)
+    mobile = models.CharField(pgettext_lazy('Customer field', 'Phone No'), max_length=100, null=True, blank=True)
     image = models.FileField(upload_to='employee', blank=True, null=True)
     date_joined = models.DateTimeField(
         pgettext_lazy('Customer field', 'date joined'),
@@ -170,6 +157,15 @@ class Customer(models.Model):
 
     def get_short_name(self):
         return self.email
+
+    def get_addresses(self):
+        return self.addresses.all()
+
+    def get_child_count(self):
+        return self.addresses.all().filter(maturity_status='child').count()
+
+    def get_adult_count(self):
+        return (self.addresses.all().filter(maturity_status='adult').count() + 1)
 
     def get_sales(self):
         return len(self.customers.all())

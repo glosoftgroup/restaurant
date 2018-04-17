@@ -16,7 +16,7 @@
             {% if perms.auth.change_group %}
               <li>
                 <a data-ta="#modal_users" data-title="Update group {{ group.name }}" data-href="{% url 'dashboard:group_manage' %}" data-name="{{ group.name }}" data-id="{{ group.pk }}" data-users="{% url 'dashboard:get_group_users' %}"
-               data-token='{{ csrf_token }}' class="modal_trigger_user edit-btn"><i class="icon-pencil7" href="#modal_edit" data-toggle="modal"></i> MANAGE USERS</a>
+               data-token='{{ csrf_token }}' class="modal_trigger_user edit-btn"><i class="icon-user" href="#modal_edit" data-toggle="modal"></i> MANAGE USERS</a>
               </li>
            {% endif %}
            {% if perms.auth.change_group %}

@@ -22,12 +22,6 @@
 <div class="row">
       <div class="panel panel-flat">
         <div class="panel-heading">
-          <div class="heading-elements">
-            <ul class="icons-list">              
-              <li><a data-action="collapse"></a></li>       
-              <li><a data-action="close"></a></li>
-            </ul>
-          </div>
         </div>
         <div class="panel-body">
 
@@ -57,8 +51,8 @@
               <tr><td>Website:</td><td> {{user.website }}</td></tr>
               <tr><td>Description:</td><td> {{user.description }} </td></tr>
             </tbody>
-
           </table>
+          
          <a href="{% url 'dashboard:supplier-edit' pk=user.pk %}" class="btn-block btn-info btn-sm"><i class="icon-pencil7" style="font-size: 11px;"></i> edit</a>
   		     </div>
 

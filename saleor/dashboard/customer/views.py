@@ -1,12 +1,15 @@
 from django.shortcuts import get_object_or_404, redirect, render_to_response
 from django.template.response import TemplateResponse
 from django.http import HttpResponse
+from django.utils.translation import pgettext_lazy
+from django.contrib import messages
+from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator, PageNotAnInteger, InvalidPage, EmptyPage
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Min, Sum, Avg, F, Q
 
 from ..views import staff_member_required
-from ...customer.models import Customer
+from ...customer.models import Customer, AddressBook
 from ...sale.models import (Sales, SoldItem)
 from ...credit.models import Credit
 from ...decorators import permission_decorator, user_trail
@@ -34,32 +37,46 @@ def user_add(request):
     try:
         user_trail(request.user.name, 'accessed add customer page', 'view')
         info_logger.info('User: ' + str(request.user.name) + 'accessed add customer page')
-        return TemplateResponse(request, 'dashboard/customer/add_user.html',{'permissions':"permissions", 'groups':"groups"})
+        # return TemplateResponse(request, 'dashboard/customer/add_user.html',{'permissions':"permissions", 'groups':"groups"})
+        return TemplateResponse(request, 'dashboard/customer/add.html',{'permissions':"permissions", 'groups':"groups"})
     except TypeError as e:
         error_logger.error(e)
         return HttpResponse('error accessing add users page')
 
-
 @staff_member_required
-def user_process(request):	
+def user_process(request):
+    user = Customer.objects.all()
     if request.method == 'POST':
-        new_user = Customer()
-        if request.POST.get('name'):
-            new_user.name = request.POST.get('name')
-        if request.POST.get('email'):
-            new_user.email = request.POST.get('email')
-        if request.POST.get('mobile'):
-            new_user.mobile = request.POST.get('mobile').replace(' ','').replace('(','').replace(')','').replace('-','')
-        if request.POST.get('creditable'):
-            new_user.creditable = True
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        nid = request.POST.get('nid')
+        dob = request.POST.get('dob')
+        nationality = request.POST.get('nationality')
+        mobile = request.POST.get('mobile')
+        description = request.POST.get('description')
+        image = request.FILES.get('image')
+        new_user = Customer.objects.create(
+            name=name,
+            email=email,
+            dob=dob,
+            nid=nid,
+            nationality=nationality,
+            mobile=mobile,
+            image=image,
+            description=description
+        )
         try:
             new_user.save()
         except:
             error_logger.info('Error when saving ')
         last_id = Customer.objects.latest('id')
-        user_trail(request.user.name, 'created customer: '+str(new_user.name),'add')
-        info_logger.info('User: '+str(request.user.name)+' created customer:'+str(new_user.name))
-        return HttpResponse(last_id.id)
+
+        user_trail(request.user.name, 'created supplier: ' + str(name), 'add')
+        info_logger.info('User: ' + str(request.user.name) + ' created customer:' + str(name))
+        success_url = reverse(
+            'dashboard:customer-edit', kwargs={'pk': last_id.pk})
+
+        return HttpResponse(json.dumps({'success_url': success_url}), content_type='application/json')
 
 
 def user_detail(request, pk):
@@ -135,27 +152,35 @@ def user_edit(request, pk):
     ctx = {'user': user}
     user_trail(request.user.name, 'accessed edit page for customer '+ str(user.name),'update')
     info_logger.info('User: '+str(request.user.name)+' accessed edit page for customer: '+str(user.name))
-    return TemplateResponse(request, 'dashboard/customer/edit_user.html', ctx)
+    # return TemplateResponse(request, 'dashboard/customer/edit_user.html', ctx)
+    return TemplateResponse(request, 'dashboard/customer/edit.html', ctx)
 
 def user_update(request, pk):
     user = get_object_or_404(Customer, pk=pk)
     if request.method == 'POST':
         name = request.POST.get('name')
         email = request.POST.get('email')
-        if request.POST.get('creditable'):
-            user.creditable = True
-        else:
-            user.creditable = False
         nid = request.POST.get('nid')
-        mobile = request.POST.get('mobile').replace(' ','').replace('(','').replace(')','').replace('-','')
+        dob = request.POST.get('dob')
+        nationality = request.POST.get('nationality')
+        mobile = request.POST.get('mobile')
+        description = request.POST.get('description')
+        image = request.FILES.get('image')
+        if image:
+            user.image = image
+
         user.name = name
         user.email = email
+        user.dob = dob
         user.nid = nid
+        user.nationality = nationality
         user.mobile = mobile
+        user.description = description
         user.save()
-        user_trail(request.user.name, 'updated customer: '+ str(user.name))
-        info_logger.info('User: '+str(request.user.name)+' updated customer: '+str(user.name))
-        return HttpResponse("success")
+        user_trail(request.user.name, 'updated customer: ' + str(user.name))
+        info_logger.info('User: ' + str(request.user.name) + ' updated supplier: ' + str(user.name))
+        return HttpResponse("success without image")
+
 
 @staff_member_required
 def customer_pagination(request):
@@ -421,4 +446,71 @@ def credit_pagination(request):
     except EmptyPage:
         users = paginator.page(paginator.num_pages)
     return TemplateResponse(request, 'dashboard/customer/pagination/credit_paginate.html', {"users":users})
+
+
+
+@staff_member_required
+def add_dependency(request, pk):
+    if request.is_ajax():
+        if request.method == 'GET':
+            if pk:
+                pk = pk
+            ctx = {'customer_pk': pk}
+            return TemplateResponse(request, 'dashboard/customer/_address_add.html', ctx)
+        if request.method == 'POST':
+            name = request.POST.get('name')
+            id_no = request.POST.get('id_no')
+            nationality = request.POST.get('nationality')
+            phone = request.POST.get('phone').replace('(', '').replace(')', '').replace('-', '')
+            maturity_status = request.POST.get('maturity_status')
+            relation = request.POST.get('relation')
+            dob = request.POST.get('dob')
+            supplier = get_object_or_404(Customer, pk=pk)
+            address = AddressBook.objects.create(
+                name=name,
+                dob=dob,
+                id_no=id_no,
+                phone=phone,
+                nationality=nationality,
+                maturity_status=maturity_status,
+                relation=relation
+            )
+            address.save()
+
+            supplier.addresses.add(address)
+
+            ctx = {'address': address}
+        return TemplateResponse(request,
+                                'dashboard/customer/_newContact.html',
+                                ctx)
+
+@staff_member_required
+def refresh_dependency(request, pk=None):
+    if request.method == 'GET':
+        if pk:
+            user = get_object_or_404(Customer, pk=pk)
+            ctx = {'user': user}
+            return TemplateResponse(request,
+                                    'dashboard/customer/_newContact.html',
+                                    ctx)
+    return HttpResponse('Post request not accepted')
+
+
+@staff_member_required
+def dependency_delete(request, pk):
+    address = get_object_or_404(AddressBook, pk=pk)
+    if request.method == 'POST':
+        address.delete()
+        messages.success(
+            request,
+            pgettext_lazy(
+                'Dashboard message', 'Deleted Dependency %s') % address)
+        if pk:
+            if request.is_ajax():
+                script = "'#tr" + str(pk) + "'"
+                return HttpResponse(script)
+    ctx = {'address': address}
+    return TemplateResponse(request,
+                            'dashboard/customer/modal_delete.html',
+                            ctx)
 
