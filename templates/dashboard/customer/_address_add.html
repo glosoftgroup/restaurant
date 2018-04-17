@@ -1,4 +1,6 @@
 {% load staticfiles %}
+{% load get_countries %}
+
 <div class="row">
     <form method="post" id="address-form" enctype="multipart/form-data">
     {% csrf_token %} 
@@ -32,8 +34,10 @@
                 <div class="form-group">
                   <div class="multi-select-full">
                       <select class="multiselect-full-featured" style="display: none;" name="nationality" id="multiple" placeholder="select a user...">
-                      <option value="kenya" selected="selected">Kenya</option>
-                      <option value="uganda" >Uganda</option>
+                      {% get_countries as countries %}
+                      {% for country in countries %}
+                          <option value="{{ country.name }}">{{ country.name }}</option>
+                      {% endfor %}
                       </select>
                     </div>
                 </div>

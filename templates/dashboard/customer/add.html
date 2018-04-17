@@ -3,6 +3,7 @@
 {% load i18n %}
 {% load prices_i18n %}
 {% load default_user_image %}
+{% load get_countries %}
 
 {% block title %}
   {% trans "Customer" context "Dashboard customer list" %} - {{ block.super }}
@@ -110,8 +111,10 @@
                                 <div class="form-group">
                                   <div class="multi-select-full">
                                       <select class="multiselect-full-featured" style="display: none;" name="nationality" id="multiple nationality" placeholder="select a user...">
-                                      <option value="kenya" selected="selected">Kenya</option>
-                                      <option value="uganda" >Uganda</option>
+                                      {% get_countries as countries %}
+                                      {% for country in countries %}
+                                          <option value="{{ country.name }}">{{ country.name }}</option>
+                                      {% endfor %}
                                       </select>
                                     </div>
                                 </div>

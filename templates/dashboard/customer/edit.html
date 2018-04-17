@@ -3,6 +3,7 @@
 {% load i18n %}
 {% load prices_i18n %}
 {% load default_user_image %}
+{% load get_countries %}
 
 {% block title %}
   Customer Update
@@ -162,14 +163,18 @@
                                 <div class="form-group">
                                   <div class="multi-select-full">
                                       <select class="multiselect-full-featured" style="display: none;" name="nationality" id="multiple" placeholder="select a user...">
-                                        {% if user.nationality %}
-                                          <option value="{{user.nationality}}" selected="selected">{{user.nationality}}</option>
-                                          <option value="kenya">Kenya</option>
-                                          <option value="uganda" >Uganda</option>
-                                        {% else %}
-                                          <option value="kenya" selected="selected">Kenya</option>
-                                          <option value="uganda" >Uganda</option>
-                                        {% endif %}
+                                        
+                                        {% get_countries as countries %}
+                                        {% for country in countries %}
+
+                                          {% if country.name == user.nationality %}
+                                            <option value="{{ country.name }}" selected="selected">{{ country.name }}</option>
+                                          {% else %}
+                                            <option value="{{ country.name }}">{{ country.name }}</option>
+                                            {% endif %}
+
+                                        {% endfor %}
+
                                       
                                       </select>
                                     </div>
