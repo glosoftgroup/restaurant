@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "assets": "^1.0",
-    "bootstrap": "^4.0.0",
+    "bootstrap": "^4.3.1",
     "classnames": "^2.2.5",
     "dropzone": "^4.2.0",
     "favicons-webpack-plugin": "^0.0.7",
